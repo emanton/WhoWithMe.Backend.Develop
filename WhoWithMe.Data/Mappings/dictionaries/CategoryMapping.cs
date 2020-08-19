@@ -1,0 +1,18 @@
+﻿using WhoWithMe.Core.Entities.dictionaries;
+using System.Data.Entity.ModelConfiguration;
+
+namespace WhoWithMe.Data.Mappings.dictionaries
+{
+    public class CategoryMapping : EntityTypeConfiguration<City>
+    {
+        public CategoryMapping()
+        {
+            ToTable("Cities");
+
+            HasKey(x => x.Id);
+            Property(x => x.Id).HasDatabaseGeneratedOption(System.ComponentModel.DataAnnotations.Schema.DatabaseGeneratedOption.Identity);
+            Property(x => x.Name).IsRequired().HasMaxLength(256);
+        }
+        
+    }
+}
