@@ -20,9 +20,9 @@ namespace WhoWithMe.Services.Implementation
 		public MessageService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _userChatRepository = unitOfWork.Repository<UserChat>();
-            _messageRepository = unitOfWork.Repository<Message>();
-            _unreadMessageRepository = unitOfWork.Repository<UnreadMessage>();
+            _userChatRepository = unitOfWork.GetRepository<UserChat>();
+            _messageRepository = unitOfWork.GetRepository<Message>();
+            _unreadMessageRepository = unitOfWork.GetRepository<UnreadMessage>();
         }
 
         public async Task<UserChat> GetUserChats(int userId, int count, int offset) // return users? // design

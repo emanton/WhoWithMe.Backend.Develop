@@ -9,16 +9,22 @@ using System.Threading.Tasks;
 
 namespace WhoWithMe.Core.Data
 {
-    public interface IUnitOfWork : IDisposable
+    public interface IUnitOfWork// : IDisposable
     {
-        int SaveChanges();
-        void Dispose(bool disposing);
-        IRepository<TEntity> Repository<TEntity>() where TEntity : class, IBaseEntity;
-        DbTransaction BeginTransaction();
-        int Commit();
-        void Rollback();
+        IRepository<TEntity> GetRepository<TEntity>() where TEntity : class, IBaseEntity;
         Task<int> SaveChangesAsync();
-        Task<int> SaveChangesAsync(CancellationToken cancellationToken);
-        Task<int> CommitAsync();
+        //void Dispose();
     }
+    //public interface IUnitOfWork : IDisposable
+    //{
+    //    int SaveChanges();
+    //    void Dispose(bool disposing);
+    //    IRepository<TEntity> Repository<TEntity>() where TEntity : class, IBaseEntity;
+    //    DbTransaction BeginTransaction();
+    //    int Commit();
+    //    void Rollback();
+    //    Task<int> SaveChangesAsync();
+    //    Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+    //    Task<int> CommitAsync();
+    //}
 }

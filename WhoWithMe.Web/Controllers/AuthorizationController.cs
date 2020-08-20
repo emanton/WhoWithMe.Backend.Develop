@@ -28,6 +28,9 @@ namespace WhoWithMe.Web.Controllers
 			_logger = logger;
 			_authorizationService = authorizationService;
 		}
+		
+		[HttpGet("EmailRegister")]
+		public async Task<IActionResult> EmailRegister(LoginData loginData) => await Wrap(_authorizationService.EmailRegister, loginData);
 
 		[HttpGet("EmailLogin")]
 		public async Task<IActionResult> EmailLogin(LoginData loginData) => await Wrap(_authorizationService.EmailLogin, loginData);

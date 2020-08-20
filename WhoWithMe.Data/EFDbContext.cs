@@ -1,41 +1,32 @@
-﻿using Core.Data;
-using WhoWithMe.Core.Entities;
+﻿using WhoWithMe.Core.Entities;
 using WhoWithMe.Core.Entities.dictionaries;
-using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Data.Common;
-using System.Data.Entity;
-using System.Data.Entity.Core.Objects;
-using System.Data.Entity.Infrastructure;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using WhoWithMe.Core.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Threading.Tasks;
 //using Microsoft.EntityFrameworkCore;
 
 namespace WhoWithMe.Data
 {
     public class EFDbContext : DbContext, IContext
     {
-        private ObjectContext _objectContext;
-        private DbTransaction _transaction;
-        private static readonly object _lock = new object();
-        private static bool _databaseInitialized;
-
-        public EFDbContext() : base("name=WhoWithMeDB")
+        public EFDbContext()
+                : base()
         {
-            if (_databaseInitialized)
-            {
-                return;
-            }
-            lock (_lock)
-            {
-                if (!_databaseInitialized)
-                {
-                    _databaseInitialized = true;
-                }
-            }
+        }
+
+        public EFDbContext(DbContextOptions<EFDbContext> options)
+                : base(options)
+        {
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+            //modelBuilder.Entity<CommentUser>().HasRequired(t => t.Project).WithMany(
+            //  p => p.Tasks).HasForeignKey(t => t.ProjectId).WillCascadeOnDelete(false);
+            //modelBuilder.Entity<Task>().HasRequired(p => p.AssignedTo);
         }
 
         public virtual DbSet<City> City { get; set; }
@@ -55,7 +46,7 @@ namespace WhoWithMe.Data
         public virtual DbSet<UserChat> UserChat { get; set; }
         public virtual DbSet<UserSubscriber> UserSubscriber { get; set; }
 
-        public new IDbSet<TEntity> Set<TEntity>() where TEntity : class, IBaseEntity
+        public new DbSet<TEntity> Set<TEntity>() where TEntity : class, IBaseEntity
         {
             return base.Set<TEntity>();
         }
@@ -75,46 +66,15 @@ namespace WhoWithMe.Data
             UpdateEntityState(entity, EntityState.Deleted);
         }
 
-        public DbTransaction BeginTransaction()
-        {
-            _objectContext = ((IObjectContextAdapter)this).ObjectContext;
-            if (_objectContext.Connection.State == ConnectionState.Open)
-            {
-                return null;
-            }
-            _objectContext.Connection.Open();
-            return _transaction = _objectContext.Connection.BeginTransaction();
-        }
-
-        public int Commit()
-        {
-            var saveChanges = SaveChanges();
-            _transaction.Commit();
-            return saveChanges;
-        }
-
-        public void Rollback()
-        {
-            _transaction.Rollback();
-        }
-
-        public Task<int> CommitAsync()
-        {
-            var saveChangesAsync = SaveChangesAsync();
-            _transaction.Commit();
-
-            return saveChangesAsync;
-        }
-
         private void UpdateEntityState<TEntity>(TEntity entity, EntityState entityState) where TEntity : class, IBaseEntity
         {
             var dbEntityEntry = GetDbEntityEntrySafely(entity);
             dbEntityEntry.State = entityState;
         }
 
-        private DbEntityEntry GetDbEntityEntrySafely<TEntity>(TEntity entity) where TEntity : class, IBaseEntity
+        private EntityEntry<TEntity> GetDbEntityEntrySafely<TEntity>(TEntity entity) where TEntity : class, IBaseEntity
         {
-            var dbEntityEntry = Entry(entity);
+			EntityEntry<TEntity> dbEntityEntry = Entry(entity);
             if (dbEntityEntry.State == EntityState.Detached)
             {
                 Set<TEntity>().Attach(entity);
@@ -123,19 +83,6 @@ namespace WhoWithMe.Data
             return dbEntityEntry;
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (_objectContext != null && _objectContext.Connection.State == ConnectionState.Open)
-                {
-                    _objectContext.Connection.Close();
-                }
-                _objectContext?.Dispose();
-                _transaction?.Dispose();
-            }
-
-            base.Dispose(disposing);
-        }
-    }
+		
+	}
 }

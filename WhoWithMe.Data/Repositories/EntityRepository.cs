@@ -1,9 +1,10 @@
 ﻿using Core.Data;
 using Core.Data.Repositories;
 using Core.Data.Repositories.Enum;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ValueGeneration.Internal;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -15,7 +16,7 @@ namespace WhoWithMe.Data.Repositories
     public class EntityRepository<TEntity> : IRepository<TEntity> where TEntity : class, IBaseEntity
     {
         private readonly IContext _context;
-        private readonly IDbSet<TEntity> _dbEntitySet;
+        private readonly DbSet<TEntity> _dbEntitySet;
         private bool _disposed;
             
         public EntityRepository(IContext context)
@@ -103,7 +104,7 @@ namespace WhoWithMe.Data.Repositories
         {
             var entities = IncludeProperties(includeProperties);
             entities = (predicate != null) ? entities.Where(predicate) : entities;
-            entities = entities.Skip(() => offset).Take(() => count);
+            entities = entities.Skip(offset).Take(count);
 
             return await entities.ToListAsync();
         }
@@ -114,7 +115,7 @@ namespace WhoWithMe.Data.Repositories
 		{
 			var entities = FilterQuery(keySelector, predicate, orderBy, includeProperties);
 
-			entities = entities.Skip(() => offset).Take(() => count);
+			entities = entities.Skip(offset).Take(count);
 
 			return await entities.ToListAsync();
 		}

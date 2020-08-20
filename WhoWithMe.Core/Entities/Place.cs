@@ -4,7 +4,7 @@ using System.Text;
 
 namespace WhoWithMe.Core.Entities
 {
-    public class Place
+    public class Place : BaseEntity
     {
     }
 }

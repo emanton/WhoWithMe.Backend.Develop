@@ -5,39 +5,22 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="obj\Debug\netcoreapp3.1\.NETCoreApp,Version=v3.1.AssemblyAttributes.cs" />
-    <Compile Include="obj\Debug\netcoreapp3.1\WhoWithMe.Data.AssemblyInfo.cs" />
+    <Compile Remove="Mappings\**" />
+    <EmbeddedResource Remove="Mappings\**" />
+    <None Remove="Mappings\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="bin\Debug\netcoreapp3.1\WhoWithMe.Data.deps.json" />
-    <Content Include="obj\Debug\netcoreapp3.1\WhoWithMe.Data.csproj.FileListAbsolute.txt" />
-    <Content Include="obj\project.assets.json" />
-    <Content Include="obj\WhoWithMe.Data.csproj.nuget.dgspec.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="bin\Debug\netcoreapp3.1\WhoWithMe.Core.dll" />
-    <None Include="bin\Debug\netcoreapp3.1\WhoWithMe.Core.pdb" />
-    <None Include="bin\Debug\netcoreapp3.1\WhoWithMe.Data.dll" />
-    <None Include="bin\Debug\netcoreapp3.1\WhoWithMe.Data.pdb" />
-    <None Include="obj\Debug\netcoreapp3.1\WhoWithMe.Data.AssemblyInfoInputs.cache" />
-    <None Include="obj\Debug\netcoreapp3.1\WhoWithMe.Data.assets.cache" />
-    <None Include="obj\Debug\netcoreapp3.1\WhoWithMe.Data.csproj.CopyComplete" />
-    <None Include="obj\Debug\netcoreapp3.1\WhoWithMe.Data.csprojAssemblyReference.cache" />
-    <None Include="obj\Debug\netcoreapp3.1\WhoWithMe.Data.dll" />
-    <None Include="obj\Debug\netcoreapp3.1\WhoWithMe.Data.pdb" />
-    <None Include="obj\project.nuget.cache" />
-    <None Include="obj\WhoWithMe.Data.csproj.nuget.g.props" />
-    <None Include="obj\WhoWithMe.Data.csproj.nuget.g.targets" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="EntityFramework" Version="6.4.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.7" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.7">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\WhoWithMe.Core\WhoWithMe.Core.csproj" />
   </ItemGroup>
+
 
 </Project>

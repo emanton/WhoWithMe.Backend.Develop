@@ -22,13 +22,13 @@ namespace WhoWithMe.Services.Implementation
         public CommentService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _commentUserRepository = unitOfWork.Repository<CommentUser>();
-            _commentMeetingRepository = unitOfWork.Repository<CommentMeeting>();
+            _commentUserRepository = unitOfWork.GetRepository<CommentUser>();
+            _commentMeetingRepository = unitOfWork.GetRepository<CommentMeeting>();
         }
         // user
         public async Task<List<CommentUser>> GetUserComments(PaginationUserId paginationUserId)
 		{
-            return await _commentUserRepository.GetAllAsync(paginationUserId.Count, paginationUserId.Offset, x => x.User.Id == paginationUserId.UserId);
+            return await _commentUserRepository.GetAllAsync(paginationUserId.Count, paginationUserId.Offset, x => x.UserToId == paginationUserId.UserId);
         }
 
         public async Task<int> AddUserComments(CommentUser commentUser)

@@ -26,9 +26,32 @@ namespace WhoWithMe.Services.Implementation
 			_unitOfWork = unitOfWork;
 		}
 
+		public async Task<bool> EmailRegister(LoginData loginData)
+		{
+			if (!IsValidEmail(loginData.Email))
+			{
+				throw new Exception("Email is invalid");
+			}
+			if (!IsValidPassword(loginData.Password))
+			{
+				throw new Exception("Password is invalid");
+			}
+
+			User user = new User();
+			user.Email = loginData.Email;
+			user.Password = EncodePassword(loginData.Password);
+			_unitOfWork.GetRepository<User>().Insert(user);
+			await _unitOfWork.SaveChangesAsync();
+			return true;
+		}
+
 		public async Task<string> EmailLogin(LoginData loginData)
 		{
 			User user = await AuthenticateUser(loginData);
+			if (user == null)
+			{
+				throw new Exception("Login or password are incorrect!");
+			}
 			return GenerateJWT(user);
 		}
 
@@ -40,7 +63,7 @@ namespace WhoWithMe.Services.Implementation
 		private async Task<User> GetUserByLoginData(LoginData loginData)
 		{
 			string encodedPassword = EncodePassword(loginData.Password);
-			return await _unitOfWork.Repository<User>().GetSingleAsync(x => x.Email == loginData.Email && x.Password == encodedPassword);
+			return await _unitOfWork.GetRepository<User>().GetSingleAsync(x => x.Email == loginData.Email && x.Password == encodedPassword);
 		}
 
 		private string GenerateJWT(User user)
@@ -71,16 +94,35 @@ namespace WhoWithMe.Services.Implementation
 
 		private string EncodePassword(string password)
 		{
-			return Encoding.UTF8.GetBytes(password).ToString();
+			byte[] data = System.Text.Encoding.ASCII.GetBytes(password);
+			data = new System.Security.Cryptography.SHA256Managed().ComputeHash(data);
+			String hash = System.Text.Encoding.ASCII.GetString(data);
+			return hash;
 		}
 
-		public async Task<bool> EmailRegister(LoginData loginData)
+		private bool IsValidEmail(string email)
 		{
-			User user = new User();
-			user.Email = loginData.Email;
-			user.Password = EncodePassword(loginData.Password);
-			_unitOfWork.Repository<User>().Insert(user);
-			await _unitOfWork.SaveChangesAsync();
+			try
+			{
+				var addr = new System.Net.Mail.MailAddress(email);
+				return addr.Address == email;
+			}
+			catch
+			{
+				return false;
+			}
+		}
+		private bool IsValidPassword(string password)
+		{
+			if (password.Length < 5)
+			{
+				throw new Exception("Password needs to be > 5");
+			}
+			if (password.Length > 20)
+			{
+				throw new Exception("Password needs to be < 20");
+			}
+
 			return true;
 		}
 	}

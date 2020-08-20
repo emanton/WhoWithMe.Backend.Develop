@@ -25,10 +25,10 @@ namespace WhoWithMe.Services.Implementation
         public MeetingService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _meetingTypeRepository = unitOfWork.Repository<MeetingType>();
-            _meetingRepository = unitOfWork.Repository<Meeting>();
-            _participantMeetingRepository = unitOfWork.Repository<ParticipantMeeting>();
-            _meetingSubscriberRepository = unitOfWork.Repository<MeetingSubscriber>();
+            _meetingTypeRepository = unitOfWork.GetRepository<MeetingType>();
+            _meetingRepository = unitOfWork.GetRepository<Meeting>();
+            _participantMeetingRepository = unitOfWork.GetRepository<ParticipantMeeting>();
+            _meetingSubscriberRepository = unitOfWork.GetRepository<MeetingSubscriber>();
         }
 
         public async Task<List<MeetingType>> GetMeetingTypes()

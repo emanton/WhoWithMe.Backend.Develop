@@ -17,6 +17,8 @@ using WhoWithMe.Services.Implementation;
 using WhoWithMe.Services.Interfaces;
 using WhoWithMe.Data;
 using WhoWithMe.Core.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 
 namespace WhoWithMe.Web
 {
@@ -28,7 +30,7 @@ namespace WhoWithMe.Web
 		}
 
 		public IConfiguration Configuration { get; }
-
+		
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
@@ -46,9 +48,11 @@ namespace WhoWithMe.Web
 					.Build())
 			);
 
-			services.AddScoped<IAuthenticationService, AuthenticationService>();
+			services.AddDbContext<EFDbContext>(options => options.UseSqlServer(GetConnectionString()));
+			services.AddTransient<IContext, EFDbContext>();
 			services.AddScoped<IUnitOfWork, UnitOfWork>();
-			services.AddScoped<IContext, EFDbContext>();
+			services.AddScoped<IAuthenticationService, AuthenticationService>();
+
 			//services.AddScoped<IAuthenticationService, AuthenticationService>();
 			//services.AddScoped<IAuthenticationService, AuthenticationService>();
 			//services.AddScoped<IAuthenticationService, AuthenticationService>();
@@ -63,28 +67,13 @@ namespace WhoWithMe.Web
 			.AddJwtBearer(jwt =>
 			{
 				jwt.RequireHttpsMetadata = false;
-				//jwt.SaveToken = true;
 				jwt.TokenValidationParameters.ValidateIssuerSigningKey = true;
 				jwt.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey));
 				jwt.TokenValidationParameters.ValidIssuer = issuer;
 				jwt.TokenValidationParameters.ValidAudience = issuer;
 				jwt.TokenValidationParameters.ValidateIssuer = true;
 				jwt.TokenValidationParameters.ValidateAudience = true;
-			}
-				//options=>
-				//{
-				//	options.TokenValidationParameters = new TokenValidationParameters
-				//	{
-				//		ValidateIssuer = true,
-				//		ValidateAudience = true,
-				//		ValidateLifetime = true,
-				//		ValidateIssuerSigningKey = true,
-				//		ValidIssuer = issuer,
-				//		ValidAudience = issuer,
-				//		IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey))
-				//	};
-				//}
-			);
+			});
 			// auth
 
 			services.AddMvc(); //added by me
@@ -119,6 +108,16 @@ namespace WhoWithMe.Web
 			{
 				endpoints.MapControllers();
 			});
+		}
+
+		private string GetConnectionString()
+		{
+			return new SqlConnectionStringBuilder
+			{
+				IntegratedSecurity = true,
+				DataSource = "DESKTOP-4RLP2RM",
+				InitialCatalog = "WhoWithMeDBDevelop"
+			}.ConnectionString;
 		}
 	}
 }

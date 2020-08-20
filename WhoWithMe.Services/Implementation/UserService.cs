@@ -20,9 +20,9 @@ namespace WhoWithMe.Services.Implementation
         public UserService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
-            _userRepository = unitOfWork.Repository<User>();
-            _userSubscriberRepository = unitOfWork.Repository<UserSubscriber>();
-            _participantMeetingRepository = unitOfWork.Repository<ParticipantMeeting>();
+            _userRepository = unitOfWork.GetRepository<User>();
+            _userSubscriberRepository = unitOfWork.GetRepository<UserSubscriber>();
+            _participantMeetingRepository = unitOfWork.GetRepository<ParticipantMeeting>();
         }
 
         public async Task<List<UserSubscriber>> GetSubscribedUsers(int userId, int count, int offset) // return users? // design
