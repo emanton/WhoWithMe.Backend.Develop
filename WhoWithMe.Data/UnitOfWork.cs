@@ -29,13 +29,13 @@ namespace WhoWithMe.Data
             return _context.SaveChangesAsync();
         }
 
-        //public void Dispose()
-        //{
-        //    Dispose(true);
-        //    GC.SuppressFinalize(this);
-        //}
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
 
-        public virtual void Dispose(bool disposing)
+		public virtual void Dispose(bool disposing)
         {
             if (!_disposed && disposing)
             {

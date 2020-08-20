@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace WhoWithMe.Core.Data
 {
-    public interface IUnitOfWork// : IDisposable
+    public interface IUnitOfWork : IDisposable
     {
         IRepository<TEntity> GetRepository<TEntity>() where TEntity : class, IBaseEntity;
         Task<int> SaveChangesAsync();
