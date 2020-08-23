@@ -48,10 +48,12 @@ namespace WhoWithMe.Web
 					.Build())
 			);
 
-			services.AddDbContext<EFDbContext>(options => options.UseSqlServer(GetConnectionString()));
+			string connectionString = GetConnectionString();
+			services.AddDbContext<EFDbContext>(options => options.UseSqlServer(connectionString));
 			services.AddTransient<IContext, EFDbContext>();
 			services.AddScoped<IUnitOfWork, UnitOfWork>();
 			services.AddScoped<IAuthenticationService, AuthenticationService>();
+			services.AddScoped<IUserService, UserService>();
 
 			//services.AddScoped<IAuthenticationService, AuthenticationService>();
 			//services.AddScoped<IAuthenticationService, AuthenticationService>();
@@ -60,7 +62,8 @@ namespace WhoWithMe.Web
 
 			// auth
 			services
-			.AddAuthentication(auth => {
+			.AddAuthentication(auth =>
+			{
 				auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
 				auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 			})
@@ -74,6 +77,11 @@ namespace WhoWithMe.Web
 				jwt.TokenValidationParameters.ValidateIssuer = true;
 				jwt.TokenValidationParameters.ValidateAudience = true;
 			});
+			//.AddFacebook(options =>
+			//{
+			//	options.AppId = "2735362606749096";
+			//	options.AppSecret = "ab085fd41f10e4fabc13823e6b9f1d92";
+			//});
 			// auth
 
 			services.AddMvc(); //added by me
@@ -112,12 +120,15 @@ namespace WhoWithMe.Web
 
 		private string GetConnectionString()
 		{
-			return new SqlConnectionStringBuilder
-			{
-				IntegratedSecurity = true,
-				DataSource = "DESKTOP-4RLP2RM",
-				InitialCatalog = "WhoWithMeDBDevelop"
-			}.ConnectionString;
+			return "Server=tcp:whowithme.database.windows.net,1433;Initial Catalog = WhoWithMe; Persist Security Info=False;User ID = whowithmekim; Password=Qwerty11;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout = 30;";
+			//return new SqlConnectionStringBuilder
+			//{
+			//	//UserID = "whowithmekim@whowithme",
+			//	//Password = "Qwerty11",
+			//	DataSource = "tcp:whowithme.database.windows.net,1433",
+			//	InitialCatalog = "WhoWithMeDBDevelop",
+			//	IntegratedSecurity = true,
+			//}.ConnectionString;
 		}
 	}
 }

@@ -18,22 +18,27 @@ namespace WhoWithMe.Web.Controllers
 {
 	[ApiController]
 	[Route("[controller]")]
-	public class AuthorizationController : ControllerBase
+	public class AuthorizationController : BaseController
 	{
-		private readonly ILogger<AuthorizationController> _logger;
 		private readonly IAuthenticationService _authorizationService;
 
-		public AuthorizationController(ILogger<AuthorizationController> logger, IAuthenticationService authorizationService)
+		public AuthorizationController(ILogger<AuthorizationController> logger, IAuthenticationService authorizationService) : base(logger)
 		{
-			_logger = logger;
 			_authorizationService = authorizationService;
 		}
 		
-		[HttpGet("EmailRegister")]
+		[HttpPost("EmailRegister")]
 		public async Task<IActionResult> EmailRegister(LoginData loginData) => await Wrap(_authorizationService.EmailRegister, loginData);
 
-		[HttpGet("EmailLogin")]
+		[HttpPost("EmailLogin")]
 		public async Task<IActionResult> EmailLogin(LoginData loginData) => await Wrap(_authorizationService.EmailLogin, loginData);
+
+		[HttpPost("FacebookLogin")]
+		public async Task<IActionResult> FacebookLogin(string accessToken) => await Wrap(_authorizationService.FacebookLogin, accessToken);
+
+		//[HttpPost("GmailLogin")]
+		//public async Task<IActionResult> GmailLogin(string authToken)
+		//	=> await Wrap(_magicService.AddPersonalStoryToUser, personalStory);
 
 		[Authorize]
 		[HttpGet("GetAuthorizedUserMessage")]
@@ -46,44 +51,6 @@ namespace WhoWithMe.Web.Controllers
 		public async Task<string> GetAnyUserMessage()
 		{
 			return "Good job!";
-		}
-
-		
-		//[HttpPost("GmailLogin")]
-		//public async Task<IActionResult> GmailLogin(string authToken)
-		//	=> await Wrap(_magicService.AddPersonalStoryToUser, personalStory);
-
-		//[HttpPost("FacebookLogin")]
-		//public async Task<IActionResult> FacebookLogin(string authToken)
-		//	=>  {return "Not implemented";}
-
-
-		private async Task<IActionResult> Wrap<MIn, T>(Func<MIn, Task<T>> method, MIn inParam)
-		{
-			ResponseWrapper<T> response = new ResponseWrapper<T>();
-			try
-			{
-				response.Data = await method.Invoke(inParam);
-			}
-			catch (Exception ex)
-			{
-				response.SetError(ex.Message);
-			}
-			return new JsonResult(response);
-		}
-
-		private async Task<IActionResult> Wrap<MIn>(Func<MIn, Task> method, MIn inParam)
-		{
-			ResponseWrapper response = new ResponseWrapper();
-			try
-			{
-				await method.Invoke(inParam);
-			}
-			catch (Exception ex)
-			{
-				response.SetError(ex.Message);
-			}
-			return new JsonResult(response);
 		}
 	}
 }

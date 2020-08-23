@@ -9,7 +9,8 @@ namespace WhoWithMe.Services.Interfaces
 {
 	public interface IAuthenticationService
 	{
+		Task<string> EmailRegister(LoginData loginData);
 		Task<string> EmailLogin(LoginData loginData);
-		Task<bool> EmailRegister(LoginData loginData);
+		Task<string> FacebookLogin(string accessToken);
 	}
 }

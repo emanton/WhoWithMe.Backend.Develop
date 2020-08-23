@@ -20,8 +20,9 @@ namespace Core.Data.Repositories
         List<TEntity> FindBy(Expression<Func<TEntity, bool>> predicate);
         void Insert(TEntity entity);
         void Update(TEntity entity);
-        void Delete(TEntity entity);
-        Task<List<TEntity>> GetAllAsync();
+		void Delete(TEntity entity);
+		//Task Delete(long id);
+		Task<List<TEntity>> GetAllAsync();
         Task<List<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> predicate, params Expression<Func<TEntity, object>>[] includeProperties);
         Task<List<TEntity>> GetAllIncludingAsync(params Expression<Func<TEntity, object>>[] includeProperties);
         Task<List<TEntity>> GetAllAsync(int count, int offset,

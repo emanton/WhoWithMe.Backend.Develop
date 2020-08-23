@@ -79,6 +79,11 @@ namespace WhoWithMe.Data.Repositories
             _context.SetAsDeleted(entity);
         }
 
+   //     public async Task Delete(long id)
+   //     {
+			//TEntity entity = await GetSingleAsync(id);
+   //         _context.SetAsDeleted(entity);
+   //     }
         //public void InsertAsync(TEntity entity) //REDO
         //{
         //    _context.SetAsAdded(entity);

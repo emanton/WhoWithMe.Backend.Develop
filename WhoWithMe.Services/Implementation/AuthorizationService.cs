@@ -13,10 +13,12 @@ using Core.Data.Repositories;
 using WhoWithMe.Core.Entities;
 using System.Text.Unicode;
 using WhoWithMe.Core.Data;
-//using Microsoft.IdentityModel.Tokens;
+using WhoWithMe.Services.Helpers;
+using WhoWithMe.Services.Exceptions;
 
 namespace WhoWithMe.Services.Implementation
 {
+	// Forgot Password
 	public class AuthenticationService : IAuthenticationService
 	{
 		private readonly IUnitOfWork _unitOfWork;
@@ -26,23 +28,17 @@ namespace WhoWithMe.Services.Implementation
 			_unitOfWork = unitOfWork;
 		}
 
-		public async Task<bool> EmailRegister(LoginData loginData)
+		public async Task<string> EmailRegister(LoginData loginData)
 		{
-			if (!IsValidEmail(loginData.Email))
-			{
-				throw new Exception("Email is invalid");
-			}
-			if (!IsValidPassword(loginData.Password))
-			{
-				throw new Exception("Password is invalid");
-			}
-
+			ValidatePassword(loginData.Password);
+			await ValidateEmail(loginData.Email);
 			User user = new User();
 			user.Email = loginData.Email;
+			user.Nickname = loginData.Email;
 			user.Password = EncodePassword(loginData.Password);
 			_unitOfWork.GetRepository<User>().Insert(user);
 			await _unitOfWork.SaveChangesAsync();
-			return true;
+			return await EmailLogin(loginData);		
 		}
 
 		public async Task<string> EmailLogin(LoginData loginData)
@@ -50,9 +46,36 @@ namespace WhoWithMe.Services.Implementation
 			User user = await AuthenticateUser(loginData);
 			if (user == null)
 			{
-				throw new Exception("Login or password are incorrect!");
+				throw new BadRequestException("Login or password are incorrect!");
 			}
 			return GenerateJWT(user);
+		}
+
+		public async Task<string> FacebookLogin(string accessToken)
+		{
+			FacebookUserInfoResult fbRes = await FacebookAuthorization.ValidateAccessTokenAsync(accessToken);
+			User user = await _unitOfWork.GetRepository<User>().GetSingleAsync(x => x.FacebookId == fbRes.Id);
+			if (user == null)
+			{
+				User newUser = await FacebookRegister(fbRes);
+				user = newUser;
+			}
+
+			return GenerateJWT(user);
+		}
+
+		private async Task<User> FacebookRegister(FacebookUserInfoResult fbRes)
+		{
+			User user = new User();
+			user.FacebookId = fbRes.Id;
+			user.Nickname = fbRes.Id;
+			user.Email = fbRes.Email;
+			user.Lastname = fbRes.LastName;
+			user.Firstname = fbRes.FirstName;
+			user.AvatarImageUrl = fbRes.Picture?.Data.Url;
+			_unitOfWork.GetRepository<User>().Insert(user);
+			await _unitOfWork.SaveChangesAsync();
+			return user;
 		}
 
 		private async Task<User> AuthenticateUser(LoginData loginData)
@@ -80,7 +103,7 @@ namespace WhoWithMe.Services.Implementation
 					new Claim[]
 					{
 						new Claim(JwtRegisteredClaimNames.Sub, "Em"),
-						new Claim(JwtRegisteredClaimNames.Email, user.Email),
+						new Claim(JwtRegisteredClaimNames.Email, user.Id.ToString()),
 						new Claim(JwtRegisteredClaimNames.Jti, new Guid().ToString())
 					}),
 				Expires = DateTime.Now.AddDays(1),
@@ -94,33 +117,46 @@ namespace WhoWithMe.Services.Implementation
 
 		private string EncodePassword(string password)
 		{
-			byte[] data = System.Text.Encoding.ASCII.GetBytes(password);
+			byte[] data = Encoding.ASCII.GetBytes(password);
 			data = new System.Security.Cryptography.SHA256Managed().ComputeHash(data);
-			String hash = System.Text.Encoding.ASCII.GetString(data);
+			string hash = Encoding.ASCII.GetString(data);
 			return hash;
 		}
 
-		private bool IsValidEmail(string email)
+		private async Task ValidateEmail(string email)
 		{
+			bool isValid;
 			try
 			{
 				var addr = new System.Net.Mail.MailAddress(email);
-				return addr.Address == email;
+				isValid = addr.Address == email;
 			}
 			catch
 			{
-				return false;
+				isValid = false;
+			}
+
+			if (!isValid)
+			{
+				throw new BadRequestException("not valid email");
+			}
+
+			var user = await _unitOfWork.GetRepository<User>().GetSingleAsync(x => x.Email == email);
+			if (user != null)
+			{
+				throw new BadRequestException("email has already existed");
 			}
 		}
-		private bool IsValidPassword(string password)
+
+		private bool ValidatePassword(string password)
 		{
 			if (password.Length < 5)
 			{
-				throw new Exception("Password needs to be > 5");
+				throw new BadRequestException("Password needs to be > 5");
 			}
 			if (password.Length > 20)
 			{
-				throw new Exception("Password needs to be < 20");
+				throw new BadRequestException("Password needs to be < 20");
 			}
 
 			return true;

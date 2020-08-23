@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using WhoWithMe.DTO;
 
 namespace WhoWithMe.Services.Interfaces
 {
@@ -12,7 +13,9 @@ namespace WhoWithMe.Services.Interfaces
     {
         Task<List<UserSubscriber>> GetSubscribedUsers(int userId, int count, int offset);
         Task<List<ParticipantMeeting>> GetUserVisits(int userId, int count, int offset);
-        Task<User> GetUserInfo(int userId);
+        Task<User> GetUserInfo(long userId);
+        Task<List<User>> GetUsers(FromToLong fromTo);
         Task<int> EditUserInfo(User user);
+        Task<bool> DeleteUser(long id);
     }
 }

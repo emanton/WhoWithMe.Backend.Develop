@@ -12,7 +12,7 @@ namespace WhoWithMe.Web.Models
 			ErrorMessage = errorMessage;
 			StatusCode = statusCode;
 		}
-		public int StatusCode { get; set; }
+		public int StatusCode { get; set; } = 200;
 		public string ErrorMessage { get; set; }
 	}
 

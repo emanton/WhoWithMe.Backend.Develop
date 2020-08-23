@@ -7,10 +7,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WhoWithMe.Core.Data;
+using WhoWithMe.Services.Interfaces;
+using WhoWithMe.DTO;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Server.IIS;
+using WhoWithMe.Services.Exceptions;
 
 namespace WhoWithMe.Services.Implementation
 {
-    public class UserService
+    public class UserService : IUserService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IRepository<User> _userRepository;
@@ -35,7 +40,7 @@ namespace WhoWithMe.Services.Implementation
             return await _participantMeetingRepository.GetAllAsync(count, offset, x => x.User.Id == userId);
         }
 
-        public async Task<User> GetUserInfo(int userId)
+        public async Task<User> GetUserInfo(long userId)
         {
             return await _userRepository.GetSingleAsync(userId);
         }
@@ -46,69 +51,22 @@ namespace WhoWithMe.Services.Implementation
             return await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task<int> Register(User user)
+        public async Task<List<User>> GetUsers(FromToLong fromTo)
         {
-            ValidateEmail(user.Email);
-            ValidatePassword(user.Password);
-            user.Password = Encrypt(user.Password);
-            _userRepository.Insert(user);
-            return await _unitOfWork.SaveChangesAsync();
+            return await _unitOfWork.GetRepository<User>().GetAllAsync(x => x.Id > fromTo.From && x.Id < fromTo.To);
         }
 
-        public async Task<User> Login(string login, string password)
+        public async Task<bool> DeleteUser(long id)
         {
-            string enPassword = Encrypt(password);
-			List<User> res = await _userRepository.GetAllAsync(x => x.Email == login && x.Password == enPassword);
-            if(res.Count > 1)
+			User user = await GetUserInfo(id);
+            if (user == null)
 			{
-                throw new Exception("ambitions of user!");
-            }
-            if (res.Count == 0)
-            {
-                throw new Exception("user not found");
-            }
-
-            return res.First();
+                throw new BadRequestException("User not found");
+			}
+            _unitOfWork.GetRepository<User>().Delete(user);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
         }
-
-        private void ValidatePassword(string password)
-        {
-            if(password.Length <= 6)
-			{
-                throw new Exception("password has to be > 6");
-            }
-        }
-
-        private void ValidateEmail(string email)
-        {
-            bool isValid;
-            try
-            {
-                var addr = new System.Net.Mail.MailAddress(email);
-                isValid = addr.Address == email;
-            }
-            catch
-            {
-                isValid = false;
-            }
-
-            if(!isValid)
-			{
-                throw new Exception("not valid email");
-            }
-
-            // check for uniq TODO
-        }
-
-        private string Encrypt(string inputString)
-		{
-            byte[] data = System.Text.Encoding.ASCII.GetBytes(inputString);
-            data = new System.Security.Cryptography.SHA256Managed().ComputeHash(data);
-            String hash = System.Text.Encoding.ASCII.GetString(data);
-            return hash;
-        }
-
-        // Forgot Password
         // hide profile
     }
 }

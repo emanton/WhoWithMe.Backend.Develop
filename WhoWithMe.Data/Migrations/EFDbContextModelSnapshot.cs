@@ -215,16 +215,28 @@ namespace WhoWithMe.Data.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<string>("AvatarImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<long?>("CityId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("FacebookId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Firstname")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("GmailId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Lastname")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Nickname")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Password")
