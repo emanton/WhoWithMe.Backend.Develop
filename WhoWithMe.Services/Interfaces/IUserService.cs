@@ -12,7 +12,7 @@ namespace WhoWithMe.Services.Interfaces
     public interface IUserService
     {
         Task<List<UserSubscriber>> GetSubscribedUsers(int userId, int count, int offset);
-        Task<List<ParticipantMeeting>> GetUserVisits(int userId, int count, int offset);
+        Task<List<MeetingSubscriber>> GetUserVisits(int userId, int count, int offset);
         Task<User> GetUserInfo(long userId);
         Task<List<User>> GetUsers(FromToLong fromTo);
         Task<int> EditUserInfo(User user);

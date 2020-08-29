@@ -57,15 +57,10 @@ namespace WhoWithMe.Data.Migrations
                     b.Property<long>("UserFromId")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("UserId")
-                        .HasColumnType("bigint");
-
                     b.Property<long>("UserToId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("CommentUser");
                 });
@@ -89,19 +84,25 @@ namespace WhoWithMe.Data.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<long?>("CityId")
+                    b.Property<string>("AvatarImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("CityId")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("CreatorId")
+                    b.Property<long>("CreatorId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long?>("MeetingTypeId")
-                        .HasColumnType("bigint");
+                    b.Property<double>("Latitude")
+                        .HasColumnType("float");
 
-                    b.Property<long?>("PlaceId")
+                    b.Property<double>("Longitude")
+                        .HasColumnType("float");
+
+                    b.Property<long>("MeetingTypeId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Requirements")
@@ -118,9 +119,27 @@ namespace WhoWithMe.Data.Migrations
 
                     b.HasIndex("MeetingTypeId");
 
-                    b.HasIndex("PlaceId");
-
                     b.ToTable("Meeting");
+                });
+
+            modelBuilder.Entity("WhoWithMe.Core.Entities.MeetingImage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("MeetingId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MeetingId");
+
+                    b.ToTable("MeetingImage");
                 });
 
             modelBuilder.Entity("WhoWithMe.Core.Entities.MeetingSubscriber", b =>
@@ -130,17 +149,21 @@ namespace WhoWithMe.Data.Migrations
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<long?>("MeetingId")
+                    b.Property<bool>("IsAccepted")
+                        .HasColumnType("bit");
+
+                    b.Property<long>("MeetingId")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("UserId")
+                    b.Property<long>("UserId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MeetingId");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("MeetingId", "UserId")
+                        .IsUnique();
 
                     b.ToTable("MeetingSubscriber");
                 });
@@ -158,10 +181,6 @@ namespace WhoWithMe.Data.Migrations
                     b.Property<DateTime>("Created")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Text")
                         .HasColumnType("nvarchar(max)");
 
@@ -170,42 +189,29 @@ namespace WhoWithMe.Data.Migrations
                     b.HasIndex("ChatId");
 
                     b.ToTable("Message");
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("Message");
                 });
 
-            modelBuilder.Entity("WhoWithMe.Core.Entities.ParticipantMeeting", b =>
+            modelBuilder.Entity("WhoWithMe.Core.Entities.UnreadMessage", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<long?>("MeetingId")
+                    b.Property<long?>("ChatId")
                         .HasColumnType("bigint");
 
-                    b.Property<long?>("UserId")
-                        .HasColumnType("bigint");
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MeetingId");
+                    b.HasIndex("ChatId");
 
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ParticipantMeeting");
-                });
-
-            modelBuilder.Entity("WhoWithMe.Core.Entities.Place", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Place");
+                    b.ToTable("UnreadMessage");
                 });
 
             modelBuilder.Entity("WhoWithMe.Core.Entities.User", b =>
@@ -275,6 +281,26 @@ namespace WhoWithMe.Data.Migrations
                     b.ToTable("UserChat");
                 });
 
+            modelBuilder.Entity("WhoWithMe.Core.Entities.UserImage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserImage");
+                });
+
             modelBuilder.Entity("WhoWithMe.Core.Entities.UserSubscriber", b =>
                 {
                     b.Property<long>("Id")
@@ -301,26 +327,15 @@ namespace WhoWithMe.Data.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("City");
-                });
-
-            modelBuilder.Entity("WhoWithMe.Core.Entities.dictionaries.MeetingSortType", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Code")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("MeetingSortType");
                 });
 
             modelBuilder.Entity("WhoWithMe.Core.Entities.dictionaries.MeetingType", b =>
@@ -331,18 +346,15 @@ namespace WhoWithMe.Data.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("MeetingType");
-                });
-
-            modelBuilder.Entity("WhoWithMe.Core.Entities.UnreadMessage", b =>
-                {
-                    b.HasBaseType("WhoWithMe.Core.Entities.Message");
-
-                    b.HasDiscriminator().HasValue("UnreadMessage");
                 });
 
             modelBuilder.Entity("WhoWithMe.Core.Entities.CommentMeeting", b =>
@@ -352,45 +364,53 @@ namespace WhoWithMe.Data.Migrations
                         .HasForeignKey("CreatorId");
 
                     b.HasOne("WhoWithMe.Core.Entities.Meeting", "Meeting")
-                        .WithMany("Comments")
+                        .WithMany()
                         .HasForeignKey("MeetingId");
-                });
-
-            modelBuilder.Entity("WhoWithMe.Core.Entities.CommentUser", b =>
-                {
-                    b.HasOne("WhoWithMe.Core.Entities.User", null)
-                        .WithMany("Comments")
-                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("WhoWithMe.Core.Entities.Meeting", b =>
                 {
                     b.HasOne("WhoWithMe.Core.Entities.dictionaries.City", "City")
                         .WithMany()
-                        .HasForeignKey("CityId");
+                        .HasForeignKey("CityId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("WhoWithMe.Core.Entities.User", "Creator")
-                        .WithMany("CreatedMeetings")
-                        .HasForeignKey("CreatorId");
+                        .WithMany()
+                        .HasForeignKey("CreatorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("WhoWithMe.Core.Entities.dictionaries.MeetingType", "MeetingType")
                         .WithMany()
-                        .HasForeignKey("MeetingTypeId");
+                        .HasForeignKey("MeetingTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
 
-                    b.HasOne("WhoWithMe.Core.Entities.Place", "Place")
+            modelBuilder.Entity("WhoWithMe.Core.Entities.MeetingImage", b =>
+                {
+                    b.HasOne("WhoWithMe.Core.Entities.Meeting", "Meeting")
                         .WithMany()
-                        .HasForeignKey("PlaceId");
+                        .HasForeignKey("MeetingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("WhoWithMe.Core.Entities.MeetingSubscriber", b =>
                 {
                     b.HasOne("WhoWithMe.Core.Entities.Meeting", "Meeting")
-                        .WithMany()
-                        .HasForeignKey("MeetingId");
+                        .WithMany("MeetingSubscribers")
+                        .HasForeignKey("MeetingId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.HasOne("WhoWithMe.Core.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
+                        .WithMany("MeetingSubscribers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("WhoWithMe.Core.Entities.Message", b =>
@@ -400,15 +420,11 @@ namespace WhoWithMe.Data.Migrations
                         .HasForeignKey("ChatId");
                 });
 
-            modelBuilder.Entity("WhoWithMe.Core.Entities.ParticipantMeeting", b =>
+            modelBuilder.Entity("WhoWithMe.Core.Entities.UnreadMessage", b =>
                 {
-                    b.HasOne("WhoWithMe.Core.Entities.Meeting", "Meeting")
+                    b.HasOne("WhoWithMe.Core.Entities.UserChat", "Chat")
                         .WithMany()
-                        .HasForeignKey("MeetingId");
-
-                    b.HasOne("WhoWithMe.Core.Entities.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("ChatId");
                 });
 
             modelBuilder.Entity("WhoWithMe.Core.Entities.User", b =>
@@ -423,6 +439,13 @@ namespace WhoWithMe.Data.Migrations
                     b.HasOne("WhoWithMe.Core.Entities.User", "Owner")
                         .WithMany()
                         .HasForeignKey("OwnerId");
+                });
+
+            modelBuilder.Entity("WhoWithMe.Core.Entities.UserImage", b =>
+                {
+                    b.HasOne("WhoWithMe.Core.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
                 });
 #pragma warning restore 612, 618
         }

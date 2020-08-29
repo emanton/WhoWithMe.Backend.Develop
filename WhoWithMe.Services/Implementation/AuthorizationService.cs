@@ -102,8 +102,7 @@ namespace WhoWithMe.Services.Implementation
 				Subject = new ClaimsIdentity(
 					new Claim[]
 					{
-						new Claim(JwtRegisteredClaimNames.Sub, "Em"),
-						new Claim(JwtRegisteredClaimNames.Email, user.Id.ToString()),
+						new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
 						new Claim(JwtRegisteredClaimNames.Jti, new Guid().ToString())
 					}),
 				Expires = DateTime.Now.AddDays(1),

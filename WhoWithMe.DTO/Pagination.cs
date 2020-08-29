@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WhoWithMe.Core.Data;
 
 namespace WhoWithMe.DTO.Model
 {
-	public abstract class Pagination
+	public abstract class Pagination : CurrentUserTmp
 	{
 		public int Count { get; set; }
 		public int Offset { get; set; }

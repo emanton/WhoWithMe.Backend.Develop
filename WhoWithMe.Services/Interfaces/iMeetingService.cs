@@ -9,25 +9,18 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WhoWithMe.DTO.Meeting;
+using WhoWithMe.DTO.Model.User;
 
 namespace WhoWithMe.Services.Interfaces
 {
     public interface IMeetingService
     {
-        Task<List<MeetingType>> GetMeetingTypes();
-
-        Task<List<Meeting>> GetMeetingsByTypeAndTitleAndSortType(int count, int offset, MeetingType meetingType, MeetingSortType meetingSortType);
-        Task<List<Meeting>> GetMeetingsByTypeAndTitleAndSortType(int count, int offset, int userId);
-
-        Task<List<ParticipantMeeting>> GetMeetingParticipants(int count, int offset, int meetingId);
-
-        Task<List<MeetingSubscriber>> GetMeetingSubscribers(int count, int offset, int meetingId);
-
-        Task<int> DeleteMeetingParticipant(UserMeetingId participantMeetingId);
-        Task<int> DeleteMeetingSubscriber(UserMeetingId participantMeetingId);
-        Task<Meeting> GetMeeting(int meetingId);
-        Task<int> AddMeeting(Meeting meeting);
+        Task<List<Meeting>> GetMeetingsByTypeAndTitleAndSortType(MeetingSearchDTO meetingSearchDTO);
+        Task<List<Meeting>> GetMeetingsByOwner(PaginationUserId paginationUserId);
+        Task<MeetingView> GetMeeting(CurrentUserIdMeetingId meetingId);
+        Task<int> AddMeeting(MeetingDTO meeting);
         Task<int> EditMeeting(Meeting meeting);
-        Task<int> DeleteMeeting(Meeting meeting);
+        Task<int> DeleteMeeting(CurrentUserIdMeetingId meeting);
     }
 }

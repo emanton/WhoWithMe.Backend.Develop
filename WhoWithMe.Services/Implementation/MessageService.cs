@@ -51,9 +51,9 @@ namespace WhoWithMe.Services.Implementation
 			return await _unitOfWork.SaveChangesAsync();
 		}
 
-		public async Task<int> CreateMessage(Message message)
+		public async Task<int> CreateMessage(MessageBase message)
         {
-            _messageRepository.Insert(message);
+            _messageRepository.Insert(message as Message);
             _unreadMessageRepository.Insert(message as UnreadMessage);
             return await _unitOfWork.SaveChangesAsync();
 

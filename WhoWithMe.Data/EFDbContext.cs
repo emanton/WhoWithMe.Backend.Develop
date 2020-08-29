@@ -1,11 +1,9 @@
 ﻿using WhoWithMe.Core.Entities;
 using WhoWithMe.Core.Entities.dictionaries;
-using System.Data.Common;
 using WhoWithMe.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using System.Threading.Tasks;
-//using Microsoft.EntityFrameworkCore;
+
 
 namespace WhoWithMe.Data
 {
@@ -23,24 +21,42 @@ namespace WhoWithMe.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-            //modelBuilder.Entity<CommentUser>().HasRequired(t => t.Project).WithMany(
-            //  p => p.Tasks).HasForeignKey(t => t.ProjectId).WillCascadeOnDelete(false);
-            //modelBuilder.Entity<Task>().HasRequired(p => p.AssignedTo);
-        }
+            modelBuilder.Entity<MeetingSubscriber>()
+            .HasOne(b => b.Meeting)
+            .WithMany(a => a.MeetingSubscribers)
+            .OnDelete(DeleteBehavior.NoAction);
 
-        public virtual DbSet<City> City { get; set; }
-        public virtual DbSet<MeetingType> MeetingType { get; set; }
-        public virtual DbSet<MeetingSortType> MeetingSortType { get; set; }
+            modelBuilder.Entity<MeetingSubscriber>()
+            .HasOne(b => b.User)
+            .WithMany(a => a.MeetingSubscribers)
+            .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<City>(entity => {
+                entity.HasIndex(e => e.Name).IsUnique();
+            });
+            modelBuilder.Entity<MeetingType>(entity => {
+                entity.HasIndex(e => e.Name).IsUnique();
+            });
+			modelBuilder.Entity<MeetingSubscriber>(entity =>
+			{
+				entity.HasIndex(e => new { e.MeetingId, e.UserId }).IsUnique();
+			});
+
+            
+
+            base.OnModelCreating(modelBuilder);
+        }
         
+        public virtual DbSet<City> City { get; set; }
+        public virtual DbSet<MeetingImage> MeetingImage { get; set; }
+        public virtual DbSet<UserImage> UserImage { get; set; }
+        public virtual DbSet<MeetingType> MeetingType { get; set; }        
         public virtual DbSet<CommentMeeting> CommentMeeting { get; set; }
         public virtual DbSet<CommentUser> CommentUser { get; set; }
         public virtual DbSet<Log> Log { get; set; }
         public virtual DbSet<Meeting> Meeting { get; set; }
         public virtual DbSet<MeetingSubscriber> MeetingSubscriber { get; set; }
         public virtual DbSet<Message> Message { get; set; }
-        public virtual DbSet<ParticipantMeeting> ParticipantMeeting { get; set; }
-        public virtual DbSet<Place> Place { get; set; }
         public virtual DbSet<UnreadMessage> UnreadMessage { get; set; }
         public virtual DbSet<User> User { get; set; }
         public virtual DbSet<UserChat> UserChat { get; set; }

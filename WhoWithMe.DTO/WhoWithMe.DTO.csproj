@@ -8,4 +8,8 @@
     <Folder Include="Comment\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\WhoWithMe.Core\WhoWithMe.Core.csproj" />
+  </ItemGroup>
+
 </Project>

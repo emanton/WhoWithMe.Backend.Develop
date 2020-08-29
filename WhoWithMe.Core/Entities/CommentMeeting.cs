@@ -9,8 +9,7 @@ namespace WhoWithMe.Core.Entities
     public class CommentMeeting : BaseEntity
     {
         public int Estimation { get; set; }
-		public User Creator { get; set; }
-		public Meeting Meeting { get; set; }
-
+		public virtual User Creator { get; set; }
+		public virtual Meeting Meeting { get; set; }
 	}
 }

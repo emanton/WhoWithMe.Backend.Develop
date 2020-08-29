@@ -10,16 +10,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WhoWithMe.Core.Data;
+using WhoWithMe.DTO.Meeting;
+using System.Diagnostics.Eventing.Reader;
+using WhoWithMe.DTO;
+using WhoWithMe.DTO.Model;
+using WhoWithMe.Services.Exceptions;
+using WhoWithMe.Services.Interfaces;
+using WhoWithMe.DTO.Model.User;
 
 namespace WhoWithMe.Services.Implementation
 {
-    public class MeetingService
+    public class MeetingService : IMeetingService
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IRepository<MeetingType> _meetingTypeRepository;
+        private readonly IRepository<City> _cityRepository;
         private readonly IRepository<Meeting> _meetingRepository;
-        private readonly IRepository<ParticipantMeeting> _participantMeetingRepository;
+        private readonly IRepository<MeetingImage> _meetingImageRepository;
         private readonly IRepository<MeetingSubscriber> _meetingSubscriberRepository;
+        private readonly IRepository<CommentMeeting> _commentMeetingRepository;
 
 
         public MeetingService(IUnitOfWork unitOfWork)
@@ -27,75 +36,42 @@ namespace WhoWithMe.Services.Implementation
             _unitOfWork = unitOfWork;
             _meetingTypeRepository = unitOfWork.GetRepository<MeetingType>();
             _meetingRepository = unitOfWork.GetRepository<Meeting>();
-            _participantMeetingRepository = unitOfWork.GetRepository<ParticipantMeeting>();
+            _meetingImageRepository = unitOfWork.GetRepository<MeetingImage>();
             _meetingSubscriberRepository = unitOfWork.GetRepository<MeetingSubscriber>();
+            _commentMeetingRepository = unitOfWork.GetRepository<CommentMeeting>();
+            _cityRepository = unitOfWork.GetRepository<City>();
         }
 
-        public async Task<List<MeetingType>> GetMeetingTypes()
+        // add sortType TODO
+        public async Task<List<Meeting>> GetMeetingsByTypeAndTitleAndSortType(MeetingSearchDTO meetingSearchDTO)
         {
-            return await _meetingTypeRepository.GetAllAsync();
+            return await _meetingRepository.GetAllAsync(meetingSearchDTO.Count, meetingSearchDTO.Offset, 
+                x => meetingSearchDTO.MeetingTypeId == null ? true : meetingSearchDTO.MeetingTypeId == x.MeetingType.Id);
         }
 
-        public async Task<List<Meeting>> GetMeetingsByTypeAndTitleAndSortType(int count, int offset, MeetingType meetingType, MeetingSortType meetingSortType)
+        public async Task<List<Meeting>> GetMeetingsByOwner(PaginationUserId paginationUserId)
         {
-            return await _meetingRepository.GetAllAsync(count, offset, x => x.MeetingType.Name == meetingType.Name); // TODO
+            return await _meetingRepository.GetAllAsync(paginationUserId.Count, paginationUserId.Offset, x => x.Creator.Id == paginationUserId.UserId);
         }
 
-        public async Task<List<Meeting>> GetMeetingsByTypeAndTitleAndSortType(int count, int offset, int userId)
+        public async Task<MeetingView> GetMeeting(CurrentUserIdMeetingId cumeeting)
         {
-            return await _meetingRepository.GetAllAsync(count, offset, x => x.Creator.Id == userId);
-        }
-
-        public async Task<List<ParticipantMeeting>> GetMeetingParticipants(int count, int offset, int meetingId)
-        {
-            return await _participantMeetingRepository.GetAllAsync(count, offset, x => x.Meeting.Id == meetingId);
-        }
-
-        public async Task<List<MeetingSubscriber>> GetMeetingSubscribers(int count, int offset, int meetingId)
-        {
-            return await _meetingSubscriberRepository.GetAllAsync(count, offset, x => x.Meeting.Id == meetingId);
-        }
-
-        public async Task<int> DeleteMeetingParticipant(UserMeetingId participantMeetingId)
-        {
-			List<ParticipantMeeting> res = await _participantMeetingRepository.GetAllAsync(x => x.User.Id == participantMeetingId.UserId && x.Meeting.Id == participantMeetingId.MeetingId);
-            if(res.Count > 1)
+            long meetingId = cumeeting.MeetingId;
+            Meeting meeting = await _meetingRepository.GetSingleAsync(meetingId);
+            if (meeting == null)
 			{
-                throw new Exception("Many res are found");
+                throw new BadRequestException("Meeting not found");
 			}
-            if (res.Count == 0)
-            {
-                throw new Exception("Result not found");
-            }
-
-            _participantMeetingRepository.Delete(res.First());
-            return await _unitOfWork.SaveChangesAsync();
+            MeetingView meetingView = new MeetingView(meeting);
+            meetingView.ParticipantsCount = await GetMeetingParticipantsCount(meetingId);
+            meetingView.SubscribersCount = await GetMeetingSubscribersCount(meetingId);
+            meetingView.CommentsCount = await GetMeetingCommentsCount(meetingId);
+            return meetingView;
         }
 
-        public async Task<int> DeleteMeetingSubscriber(UserMeetingId participantMeetingId)
+        public async Task<int> AddMeeting(MeetingDTO meeting)
         {
-			List<MeetingSubscriber> res = await _meetingSubscriberRepository.GetAllAsync(x => x.User.Id == participantMeetingId.UserId && x.Meeting.Id == participantMeetingId.MeetingId);
-            if (res.Count > 1)
-            {
-                throw new Exception("Many res are found");
-            }
-            if (res.Count == 0)
-            {
-                throw new Exception("Result not found");
-            }
-
-            _meetingSubscriberRepository.Delete(res.First());
-            return await _unitOfWork.SaveChangesAsync();
-        }
-
-        public async Task<Meeting> GetMeeting(int meetingId)
-        {
-            return await _meetingRepository.GetSingleAsync(meetingId);
-        }
-
-        public async Task<int> AddMeeting(Meeting meeting)
-        {
-            _meetingRepository.Insert(meeting);
+            _meetingRepository.Insert(meeting.GetMeeting());
             return await _unitOfWork.SaveChangesAsync();
         }
 
@@ -105,10 +81,41 @@ namespace WhoWithMe.Services.Implementation
             return await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task<int> DeleteMeeting(Meeting meeting)
+        public async Task<int> DeleteMeeting(CurrentUserIdMeetingId meetingId)
         {
+            Meeting meeting = await _meetingRepository.GetSingleAsync(x => x.Id == meetingId.MeetingId);
+            if (meeting == null)
+            {
+                throw new BadRequestException("meeting not found");
+            }
+			List<MeetingSubscriber> subscribers = await _meetingSubscriberRepository.FindByAsync(x => x.MeetingId == meetingId.MeetingId);
+			List<MeetingImage> meetingImages = await _meetingImageRepository.FindByAsync(x => x.MeetingId == meetingId.MeetingId);
             _meetingRepository.Delete(meeting);
+			foreach (MeetingSubscriber subscriber in subscribers)
+			{
+                _meetingSubscriberRepository.Delete(subscriber);
+            }
+            foreach (MeetingImage image in meetingImages)
+            {
+                _meetingImageRepository.Delete(image);
+                // delete in s3 TODO REDO!! anton
+            }
             return await _unitOfWork.SaveChangesAsync();
+        }
+
+        private async Task<int> GetMeetingParticipantsCount(long meetingId)
+        {
+            return await _meetingSubscriberRepository.GetCount(x => x.MeetingId == meetingId && x.IsAccepted);
+        }
+
+        private async Task<int> GetMeetingSubscribersCount(long meetingId)
+        {
+            return await _meetingSubscriberRepository.GetCount(x => x.MeetingId == meetingId && !x.IsAccepted);
+        }
+
+        private async Task<int> GetMeetingCommentsCount(long meetingId)
+        {
+            return await _commentMeetingRepository.GetCount(x => x.Meeting.Id == meetingId);
         }
     }
 }

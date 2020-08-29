@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace WhoWithMe.Core.Entities
 {
@@ -15,11 +16,11 @@ namespace WhoWithMe.Core.Entities
         public string Email { get; set; }
         public string Password { get; set; }
         public string Phone { get; set; }
-		public City City { get; set; }
+        [JsonIgnore]
+        public virtual City City { get; set; }
         public string FacebookId { get; set; }
         public string GmailId { get; set; }
-        public List<Meeting> CreatedMeetings { get; set; }
-		//public List<string> ImageUrls { get; set; }
-		public List<CommentUser> Comments { get; set; }
-	}
+        [JsonIgnore]
+        public virtual List<MeetingSubscriber> MeetingSubscribers { get; set; }
+    }
 }

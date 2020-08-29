@@ -54,11 +54,9 @@ namespace WhoWithMe.Web
 			services.AddScoped<IUnitOfWork, UnitOfWork>();
 			services.AddScoped<IAuthenticationService, AuthenticationService>();
 			services.AddScoped<IUserService, UserService>();
-
-			//services.AddScoped<IAuthenticationService, AuthenticationService>();
-			//services.AddScoped<IAuthenticationService, AuthenticationService>();
-			//services.AddScoped<IAuthenticationService, AuthenticationService>();
-			//services.AddScoped<IAuthenticationService, AuthenticationService>();
+			services.AddScoped<IMeetingService, MeetingService>();
+			services.AddScoped<IMeetingSubscriberService, MeetingSubscriberService>();
+			services.AddScoped<IDictionaryService, DictionaryService>();
 
 			// auth
 			services
@@ -125,7 +123,7 @@ namespace WhoWithMe.Web
 			//{
 			//	//UserID = "whowithmekim@whowithme",
 			//	//Password = "Qwerty11",
-			//	DataSource = "tcp:whowithme.database.windows.net,1433",
+			//	DataSource = "DESKTOP-4RLP2RM",
 			//	InitialCatalog = "WhoWithMeDBDevelop",
 			//	IntegratedSecurity = true,
 			//}.ConnectionString;

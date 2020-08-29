@@ -20,14 +20,14 @@ namespace WhoWithMe.Services.Implementation
         private readonly IUnitOfWork _unitOfWork;
         private readonly IRepository<User> _userRepository;
         private readonly IRepository<UserSubscriber> _userSubscriberRepository;
-        private readonly IRepository<ParticipantMeeting> _participantMeetingRepository;
+        private readonly IRepository<MeetingSubscriber> _subscriberMeetingRepository;
 
         public UserService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _userRepository = unitOfWork.GetRepository<User>();
             _userSubscriberRepository = unitOfWork.GetRepository<UserSubscriber>();
-            _participantMeetingRepository = unitOfWork.GetRepository<ParticipantMeeting>();
+            _subscriberMeetingRepository = unitOfWork.GetRepository<MeetingSubscriber>();
         }
 
         public async Task<List<UserSubscriber>> GetSubscribedUsers(int userId, int count, int offset) // return users? // design
@@ -35,9 +35,9 @@ namespace WhoWithMe.Services.Implementation
             return await _userSubscriberRepository.GetAllAsync(count, offset, x => x.TargetUserId == userId);
         }
 
-        public async Task<List<ParticipantMeeting>> GetUserVisits(int userId, int count, int offset) // return meetings? // designs
+        public async Task<List<MeetingSubscriber>> GetUserVisits(int userId, int count, int offset) // return meetings? // designs
         {
-            return await _participantMeetingRepository.GetAllAsync(count, offset, x => x.User.Id == userId);
+            return await _subscriberMeetingRepository.GetAllAsync(count, offset, x => x.UserId == userId);
         }
 
         public async Task<User> GetUserInfo(long userId)

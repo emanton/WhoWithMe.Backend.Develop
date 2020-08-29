@@ -42,11 +42,6 @@ namespace WhoWithMe.Data.Repositories
             return entities.ToList();
         }
 
-        public TEntity GetSingle(long id)
-        {
-            return _dbEntitySet.FirstOrDefault(t => t.Id == id);
-        }
-
         public async Task<TEntity> GetSingleAsync(Expression<Func<TEntity, bool>> predicate)
         {
             return await _dbEntitySet.FirstOrDefaultAsync(predicate);
@@ -96,6 +91,20 @@ namespace WhoWithMe.Data.Repositories
         }
 
         // my
+        public async Task<int> GetCount(Expression<Func<TEntity, bool>> predicate)
+        {
+			return await _dbEntitySet
+            .Where(predicate)
+            .CountAsync();
+        }
+
+        public async Task<List<TEntity>> GetAllAsync(int count, int offset, Expression<Func<TEntity, bool>> predicate = null)
+        {
+			IQueryable<TEntity> entities = predicate != null ? _dbEntitySet.Where(predicate) : _dbEntitySet;
+            entities = entities.Skip(offset).Take(count);
+            return await entities.ToListAsync();
+        }
+
         public async Task<List<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> predicate, params Expression<Func<TEntity, object>>[] includeProperties)
         {
             var entities = IncludeProperties(includeProperties);
@@ -113,23 +122,25 @@ namespace WhoWithMe.Data.Repositories
 
             return await entities.ToListAsync();
         }
+
+
         // my
 
-        public async Task<List<TEntity>> GetAllAsync(int count, int offset, Expression<Func<TEntity, DateTime>> keySelector,
-			Expression<Func<TEntity, bool>> predicate, OrderBy orderBy, params Expression<Func<TEntity, object>>[] includeProperties)
-		{
-			var entities = FilterQuery(keySelector, predicate, orderBy, includeProperties);
+  //      public async Task<List<TEntity>> GetAllAsync(int count, int offset, Expression<Func<TEntity, DateTime>> keySelector,
+		//	Expression<Func<TEntity, bool>> predicate, OrderBy orderBy, params Expression<Func<TEntity, object>>[] includeProperties)
+		//{
+		//	var entities = FilterQuery(keySelector, predicate, orderBy, includeProperties);
 
-			entities = entities.Skip(offset).Take(count);
+		//	entities = entities.Skip(offset).Take(count);
 
-			return await entities.ToListAsync();
-		}
+		//	return await entities.ToListAsync();
+		//}
 
-		public Task<List<TEntity>> GetAllIncludingAsync(params Expression<Func<TEntity, object>>[] includeProperties)
-        {
-            var entities = IncludeProperties(includeProperties);
-            return entities.ToListAsync();
-        }
+		//public Task<List<TEntity>> GetAllIncludingAsync(params Expression<Func<TEntity, object>>[] includeProperties)
+  //      {
+  //          var entities = IncludeProperties(includeProperties);
+  //          return entities.ToListAsync();
+  //      }
 
         public Task<TEntity> GetSingleAsync(long id)
         {
@@ -152,18 +163,25 @@ namespace WhoWithMe.Data.Repositories
             return includeProperties.Aggregate<Expression<Func<TEntity, object>>, IQueryable<TEntity>>(_dbEntitySet, (current, includeProperty) => current.Include(includeProperty));
         }
 
-        private IQueryable<TEntity> FilterQuery(Expression<Func<TEntity, DateTime>> keySelector, Expression<Func<TEntity, bool>> predicate, OrderBy orderBy, Expression<Func<TEntity, object>>[] includeProperties)
-        {
-            var entities = IncludeProperties(includeProperties);
-            entities = (predicate != null) ? entities.Where(predicate) : entities;
-            entities = (orderBy == OrderBy.Ascending)
-                ? entities.OrderBy(keySelector)
-                : entities.OrderByDescending(keySelector);
+		private IQueryable<TEntity> FilterQuery(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, DateTime>> keySelector, OrderBy orderBy, Expression<Func<TEntity, object>>[] includeProperties)
+		{
+			var entities = IncludeProperties(includeProperties);
+			entities = (predicate != null) ? entities.Where(predicate) : entities;
+			entities = (orderBy == OrderBy.Ascending)
+				? entities.OrderBy(keySelector)
+				: entities.OrderByDescending(keySelector);
 
-            return entities;
-        }
+			return entities;
+		}
 
-        public void Dispose()
+		//private IQueryable<TEntity> FilterQuery(Expression<Func<TEntity, bool>> predicate, Expression<Func<TEntity, object>>[] includeProperties)
+		//{
+		//    var entities = IncludeProperties(includeProperties);
+		//    entities = (predicate != null) ? entities.Where(predicate) : entities;
+		//    return entities;
+		//}
+
+		public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);

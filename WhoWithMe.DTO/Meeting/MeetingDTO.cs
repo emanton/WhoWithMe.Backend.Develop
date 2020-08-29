@@ -1,0 +1,38 @@
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
+using WhoWithMe.Core.Data;
+using WhoWithMe.Core.Entities;
+using WhoWithMe.Core.Entities.dictionaries;
+
+namespace WhoWithMe.DTO.Meeting
+{
+	public class MeetingDTO : CurrentUserTmp
+	{
+		public string Title { get; set; }
+		public string AvatarImageUrl { get; set; }
+		public string Description { get; set; }
+		public string Requirements { get; set; }
+		public long CreatorId { get; set; }
+		public long CityId { get; set; }
+		public long MeetingTypeId { get; set; }
+		public double Latitude { get; set; }
+		public double Longitude { get; set; }
+		 
+
+		public Core.Entities.Meeting GetMeeting()
+		{
+			return new Core.Entities.Meeting
+			{
+				Title = Title,
+				AvatarImageUrl = AvatarImageUrl,
+				Description = Description,
+				Requirements = Requirements,
+				CreatorId = CreatorId,
+				CityId = CityId,
+				MeetingTypeId = MeetingTypeId,
+				Latitude = Latitude,
+				Longitude = Longitude,
+			};
+		}
+	}
+}
