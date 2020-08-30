@@ -16,6 +16,7 @@ namespace WhoWithMe.Services.Helpers
 {
 	public static class S3StorageService
 	{
+        private static string baseUrl = "https://whowithmedev.s3.eu-central-1.amazonaws.com/";
         private static string bucketName = "whowithmedev";
         private static readonly RegionEndpoint bucketRegion = RegionEndpoint.EUCentral1;
         private static IAmazonS3 _s3Client;
@@ -26,16 +27,16 @@ namespace WhoWithMe.Services.Helpers
             _s3Client = new AmazonS3Client(awsPublicKey, awsSecretKey, bucketRegion);
         }
 
-        public static async Task<string> UploadMeetingFile(MeetingPhoto userPhoto)
+        public static async Task<string> UploadMeetingFile(long meetingId, IFormFile formFile)
         {
-            string key = $"images/meetings/{userPhoto.MeetingId}/{Guid.NewGuid()}";
-            return await UploadFileToS3(userPhoto.FormFile, key);
+            string key = $"images/meetings/{meetingId}/{Guid.NewGuid()}";
+            return await UploadFileToS3(formFile, key);
         }
        
-        public static async Task<string> UploadUserFile(UserPhoto userPhoto)
-		{
-            string key = $"images/users/{userPhoto.UserId}/{Guid.NewGuid()}";
-            return await UploadFileToS3(userPhoto.FormFile, key);
+        public static async Task<string> UploadUserFile(long userId, IFormFile formFile)
+        {
+            string key = $"images/users/{userId}/{Guid.NewGuid()}";
+            return await UploadFileToS3(formFile, key);
         }
 
         private static async Task<string> UploadFileToS3(IFormFile file, string key)
@@ -58,15 +59,7 @@ namespace WhoWithMe.Services.Helpers
 				await fileTransferUtility.UploadAsync(uploadRequest);
 			}
 
-            GetPreSignedUrlRequest expiryUrlRequest = new GetPreSignedUrlRequest
-            {
-                BucketName = bucketName,
-                Key = key,
-                Expires = DateTime.Now.AddMinutes(5)
-            };
-
-            string fileUrl = _s3Client.GetPreSignedURL(expiryUrlRequest);
-            return fileUrl;
+            return baseUrl + key;
         }
     }
 }

@@ -8,7 +8,7 @@ namespace WhoWithMe.DTO.Meeting
 {
 	public class MeetingSearchDTO : Pagination
 	{
-		public int? MeetingTypeId { get; set; }
+		public List<long> MeetingTypeIds { get; set; }
 		//public int? MeetingSortTypeId { get; set; }
 	}
 }

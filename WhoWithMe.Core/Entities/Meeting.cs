@@ -28,5 +28,7 @@ namespace WhoWithMe.Core.Entities
 		public virtual MeetingType MeetingType { get; set; }
 		[JsonIgnore]
 		public virtual List<MeetingSubscriber> MeetingSubscribers { get; set; }
+		[JsonIgnore]
+		public virtual List<MeetingImage> MeetingImages { get; set; }
 	}
 }

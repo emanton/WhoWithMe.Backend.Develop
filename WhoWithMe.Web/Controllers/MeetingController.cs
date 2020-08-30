@@ -42,10 +42,10 @@ namespace WhoWithMe.Web.Controllers
 		public async Task<IActionResult> GetMeeting(CurrentUserIdMeetingId meetingId) => await Wrap(_meetingService.GetMeeting, meetingId);
 
 		[HttpPost("AddMeeting")]
-		public async Task<IActionResult> AddMeeting(MeetingDTO meeting) => await Wrap(_meetingService.AddMeeting, meeting);
+		public async Task<IActionResult> AddMeeting(MeetingCreateDTO meeting) => await Wrap(_meetingService.AddMeeting, meeting);
 
 		[HttpPost("EditMeeting")]
-		public async Task<IActionResult> EditMeeting(Meeting meeting) => await Wrap(_meetingService.EditMeeting, meeting);
+		public async Task<IActionResult> EditMeeting(MeetingEditDTO meeting) => await Wrap(_meetingService.EditMeeting, meeting);
 
 		[HttpPost("DeleteMeeting")]
 		public async Task<IActionResult> DeleteMeeting(CurrentUserIdMeetingId meetingId) => await Wrap(_meetingService.DeleteMeeting, meetingId);

@@ -17,6 +17,8 @@ using WhoWithMe.DTO.Model;
 using WhoWithMe.Services.Exceptions;
 using WhoWithMe.Services.Interfaces;
 using WhoWithMe.DTO.Model.User;
+using WhoWithMe.Services.Helpers;
+using Microsoft.AspNetCore.Http;
 
 namespace WhoWithMe.Services.Implementation
 {
@@ -45,8 +47,22 @@ namespace WhoWithMe.Services.Implementation
         // add sortType TODO
         public async Task<List<Meeting>> GetMeetingsByTypeAndTitleAndSortType(MeetingSearchDTO meetingSearchDTO)
         {
-            return await _meetingRepository.GetAllAsync(meetingSearchDTO.Count, meetingSearchDTO.Offset, 
-                x => meetingSearchDTO.MeetingTypeId == null ? true : meetingSearchDTO.MeetingTypeId == x.MeetingType.Id);
+            if (meetingSearchDTO.MeetingTypeIds == null || meetingSearchDTO.MeetingTypeIds.Count == 0)
+			{
+                return await _meetingRepository.GetAllAsync(meetingSearchDTO.Count, meetingSearchDTO.Offset);
+            }
+
+			return await _meetingRepository.GetAllAsync(meetingSearchDTO.Count, meetingSearchDTO.Offset,
+				x => meetingSearchDTO.MeetingTypeIds.Contains(x.MeetingType.Id));
+
+			//return await _meetingRepository.GetAllAsync(meetingSearchDTO.Count, meetingSearchDTO.Offset,
+			//    new System.Linq.Expressions.Expression<Func<Meeting, bool>>(x =>
+			//    {
+			//        var someLocalVar = meetingSearchDTO.MeetingTypeIds.Contains(x.MeetingType.Id);
+
+			//        return true;
+			//    }));
+			;
         }
 
         public async Task<List<Meeting>> GetMeetingsByOwner(PaginationUserId paginationUserId)
@@ -66,19 +82,33 @@ namespace WhoWithMe.Services.Implementation
             meetingView.ParticipantsCount = await GetMeetingParticipantsCount(meetingId);
             meetingView.SubscribersCount = await GetMeetingSubscribersCount(meetingId);
             meetingView.CommentsCount = await GetMeetingCommentsCount(meetingId);
+            meetingView.MeetingImages = await _meetingImageRepository.GetAllAsync(3,0, x => x.MeetingId == meetingId);
             return meetingView;
         }
 
-        public async Task<int> AddMeeting(MeetingDTO meeting)
+        // -----------------------------added
+        public async Task<List<MeetingImage>> GetMeetingImages(PaginationMeetingId pagMet)
         {
-            _meetingRepository.Insert(meeting.GetMeeting());
-            return await _unitOfWork.SaveChangesAsync();
+            return await _meetingImageRepository.GetAllAsync(pagMet.Count, pagMet.Offset, x => x.MeetingId == pagMet.MeetingId);
         }
 
-        public async Task<int> EditMeeting(Meeting meeting)
+        public async Task<int> AddMeeting(MeetingCreateDTO meetingDTO)
         {
-            _meetingRepository.Update(meeting);
-            return await _unitOfWork.SaveChangesAsync();
+            Meeting meeting = meetingDTO.GetMeeting();
+            _meetingRepository.Insert(meeting);
+            int res = await _unitOfWork.SaveChangesAsync();
+            await CreateMeetingImages(meeting.Id, meetingDTO.MeetingImages);
+
+            return res;
+        }
+
+        public async Task<int> EditMeeting(MeetingEditDTO meetingDTO)
+        {
+            _meetingRepository.Update(meetingDTO.GetMeeting());
+            int res = await _unitOfWork.SaveChangesAsync();
+            await DeleteMeetingImages(meetingDTO.RemovedImageIds);
+            await CreateMeetingImages(meetingDTO.Id, meetingDTO.MeetingImages);
+            return res;
         }
 
         public async Task<int> DeleteMeeting(CurrentUserIdMeetingId meetingId)
@@ -88,18 +118,51 @@ namespace WhoWithMe.Services.Implementation
             {
                 throw new BadRequestException("meeting not found");
             }
+
 			List<MeetingSubscriber> subscribers = await _meetingSubscriberRepository.FindByAsync(x => x.MeetingId == meetingId.MeetingId);
 			List<MeetingImage> meetingImages = await _meetingImageRepository.FindByAsync(x => x.MeetingId == meetingId.MeetingId);
-            _meetingRepository.Delete(meeting);
+            List<long> meetingImageIds = meetingImages.Select(x => x.Id).ToList();
+            await DeleteMeetingImages(meetingImageIds);
 			foreach (MeetingSubscriber subscriber in subscribers)
 			{
                 _meetingSubscriberRepository.Delete(subscriber);
             }
-            foreach (MeetingImage image in meetingImages)
+
+            _meetingRepository.Delete(meeting);
+            return await _unitOfWork.SaveChangesAsync();
+        }
+
+        private async Task<int> CreateMeetingImages(long meetingId, List<IFormFile> meetingImages)
+        {
+            if (meetingImages == null || meetingImages.Count == 0)
             {
-                _meetingImageRepository.Delete(image);
-                // delete in s3 TODO REDO!! anton
+                return 0;
             }
+
+            foreach (IFormFile formFile in meetingImages)
+            {
+                string imageUrl = await S3StorageService.UploadMeetingFile(meetingId, formFile);
+                MeetingImage meetingImage = new MeetingImage
+                {
+                    ImageUrl = imageUrl,
+                    MeetingId = meetingId
+                };
+
+                _meetingImageRepository.Insert(meetingImage);
+            }
+
+            return await _unitOfWork.SaveChangesAsync();
+        }
+
+        private async Task<int> DeleteMeetingImages(List<long> meetingImageIds)
+        {
+            foreach (long imageId in meetingImageIds)
+            {
+                MeetingImage meetingImage = await _meetingImageRepository.GetSingleAsync(x => x.Id == imageId);
+                _meetingImageRepository.Delete(meetingImage);
+                // delete in s3!!!!!
+            }
+
             return await _unitOfWork.SaveChangesAsync();
         }
 

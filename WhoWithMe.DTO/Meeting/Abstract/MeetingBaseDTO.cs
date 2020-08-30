@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 using WhoWithMe.Core.Data;
-using WhoWithMe.Core.Entities;
-using WhoWithMe.Core.Entities.dictionaries;
 
-namespace WhoWithMe.DTO.Meeting
+namespace WhoWithMe.DTO.Meeting.Abstract
 {
-	public class MeetingDTO : CurrentUserTmp
+    public class MeetingBaseDTO : CurrentUserTmp
 	{
 		public string Title { get; set; }
 		public string AvatarImageUrl { get; set; }
@@ -17,7 +16,6 @@ namespace WhoWithMe.DTO.Meeting
 		public long MeetingTypeId { get; set; }
 		public double Latitude { get; set; }
 		public double Longitude { get; set; }
-		 
 
 		public Core.Entities.Meeting GetMeeting()
 		{
@@ -31,7 +29,7 @@ namespace WhoWithMe.DTO.Meeting
 				CityId = CityId,
 				MeetingTypeId = MeetingTypeId,
 				Latitude = Latitude,
-				Longitude = Longitude,
+				Longitude = Longitude
 			};
 		}
 	}

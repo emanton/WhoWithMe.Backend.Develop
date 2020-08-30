@@ -5,13 +5,13 @@ using System.Text;
 
 namespace WhoWithMe.Services.SpecificModels
 {
-	public class MeetingPhoto
+	public class MeetingImage
 	{
 		public long MeetingId { get; set; }
 		public IFormFile FormFile { get; set; }
 	}
 
-	public class UserPhoto
+	public class UserImage
 	{
 		public long UserId { get; set; }
 		public IFormFile FormFile { get; set; }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using WhoWithMe.Core.Entities;
 
 namespace WhoWithMe.DTO.Meeting
 {
@@ -9,11 +10,13 @@ namespace WhoWithMe.DTO.Meeting
 		public int ParticipantsCount { get; set; }
 		public int SubscribersCount { get; set; }
 		public int CommentsCount { get; set; }
+		public List<string> MeetingImageUrls { get; set; }
 
 		public MeetingView()
 		{
 
 		}
+
 		public MeetingView(Core.Entities.Meeting meeting)
 		{
 			AvatarImageUrl = meeting.AvatarImageUrl;

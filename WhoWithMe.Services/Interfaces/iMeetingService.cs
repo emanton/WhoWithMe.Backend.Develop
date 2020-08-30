@@ -19,8 +19,8 @@ namespace WhoWithMe.Services.Interfaces
         Task<List<Meeting>> GetMeetingsByTypeAndTitleAndSortType(MeetingSearchDTO meetingSearchDTO);
         Task<List<Meeting>> GetMeetingsByOwner(PaginationUserId paginationUserId);
         Task<MeetingView> GetMeeting(CurrentUserIdMeetingId meetingId);
-        Task<int> AddMeeting(MeetingDTO meeting);
-        Task<int> EditMeeting(Meeting meeting);
+        Task<int> AddMeeting(MeetingCreateDTO meeting);
+        Task<int> EditMeeting(MeetingEditDTO meeting);
         Task<int> DeleteMeeting(CurrentUserIdMeetingId meeting);
     }
 }
