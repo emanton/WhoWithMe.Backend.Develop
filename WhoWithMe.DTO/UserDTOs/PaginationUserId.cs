@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WhoWithMe.DTO;
 
-namespace WhoWithMe.DTO.Model.User
+namespace WhoWithMe.DTO.UserDTOs
 {
 	public class PaginationUserId : Pagination
 	{

@@ -11,7 +11,7 @@ using WhoWithMe.Core.Data;
 
 namespace WhoWithMe.Core.Entities
 {
-    public abstract class BaseEntity : CurrentUserTmp, IBaseEntity
+    public abstract class BaseEntity : /*CurrentUserTmp,*/ IBaseEntity
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

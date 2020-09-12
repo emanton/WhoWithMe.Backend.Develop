@@ -14,6 +14,7 @@ using WhoWithMe.Services.Interfaces;
 using WhoWithMe.DTO.Model.Authorization;
 using WhoWithMe.Web.Models;
 using WhoWithMe.DTO;
+using WhoWithMe.DTO.UserDTOs;
 
 namespace WhoWithMe.Web.Controllers
 {
@@ -32,9 +33,15 @@ namespace WhoWithMe.Web.Controllers
 		public async Task<IActionResult> GetUsers(FromToLong fromTo) => await Wrap(_userService.GetUsers, fromTo);
 
 		[HttpPost("GetUserInfo")]
-		public async Task<IActionResult> GetUserInfo(long id) => await WithoutJwtWrap(_userService.GetUserInfo, id);
+		public async Task<IActionResult> GetUserInfo(long id) => await Wrap(_userService.GetUserInfo, id);
 
 		[HttpPost("DeleteUser")]
-		public async Task<IActionResult> DeleteUser(long id) => await WithoutJwtWrap(_userService.DeleteUser, id);
+		public async Task<IActionResult> DeleteUser(long id) => await Wrap(_userService.DeleteUser, id);
+
+		[HttpPost("ConfirmPhoneNumberPassword")]
+		public async Task<IActionResult> ConfirmPhoneNumberPassword(UserIdPhone userIdPhone) => await Wrap(_userService.UpdatePhoneNumber, userIdPhone);
+
+		[HttpPost("UpdatePhoneNumber")]
+		public async Task<IActionResult> UpdatePhoneNumber(PhoneConfirmPassword phoneConfirmPassword) => await Wrap(_userService.ConfirmPhoneNumberPassword, phoneConfirmPassword);
 	}
 }

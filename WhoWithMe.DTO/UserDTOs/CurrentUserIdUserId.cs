@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using WhoWithMe.Core.Data;
 
-namespace WhoWithMe.DTO.Meeting
+namespace WhoWithMe.DTO.UserDTOs
 {
-	public class CurrentUserIdUserId : CurrentUserTmp
+	public class CurrentUserIdUserId// : CurrentUserTmp
 	{
 		public long UserId { get;set; }
 	}

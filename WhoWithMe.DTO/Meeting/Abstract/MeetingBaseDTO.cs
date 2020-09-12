@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json.Serialization;
 using WhoWithMe.Core.Data;
 
 namespace WhoWithMe.DTO.Meeting.Abstract
 {
-    public class MeetingBaseDTO : CurrentUserTmp
+	// update
+    public class MeetingBaseDTO// : CurrentUserTmp
 	{
 		public string Title { get; set; }
 		public string AvatarImageUrl { get; set; }
@@ -17,7 +19,7 @@ namespace WhoWithMe.DTO.Meeting.Abstract
 		public double Latitude { get; set; }
 		public double Longitude { get; set; }
 
-		public Core.Entities.Meeting GetMeeting()
+		public virtual Core.Entities.Meeting GetMeeting()
 		{
 			return new Core.Entities.Meeting
 			{

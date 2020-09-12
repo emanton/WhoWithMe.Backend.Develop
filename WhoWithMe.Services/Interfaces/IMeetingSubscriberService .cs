@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WhoWithMe.DTO.Meeting;
-using WhoWithMe.DTO.Model.User;
+using WhoWithMe.DTO.UserDTOs;
 
 namespace WhoWithMe.Services.Interfaces
 {

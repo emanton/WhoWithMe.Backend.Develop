@@ -9,19 +9,21 @@ using WhoWithMe.Web.Models;
 
 namespace WhoWithMe.Web.Controllers
 {
-	public class FileController : BaseController
+	public class NotificationTestController : BaseController
 	{
-		private readonly IMeetingService _meetingService;
+		//private readonly IMeetingService _meetingService;
 
-		public FileController(ILogger<MeetingController> logger, IMeetingService meetingService) : base(logger)
+		public NotificationTestController(ILogger<MeetingController> logger) : base(logger)
 		{
-			_meetingService = meetingService;
 		}
 
-		[HttpPost("TestUploadOnlyFile")]
-		public async Task<IActionResult> Test(IFormFile formFile)
+
+
+		[HttpPost("SendCustomNotification")]
+		public async Task<IActionResult> Test(CustomNotification notification)
 		{
-			return new JsonResult(formFile);
+			string res = await FirebaseService.Test(notification);
+			return new JsonResult(res);
 		}
 		//[HttpPost("TestUploadOnlyFile")]
 		//public async Task<IActionResult> Test(IFormFile UserImage) => await WithoutJwtWrap(S3StorageService.UploadUserFile, new UserImage { FormFile = UserImage });

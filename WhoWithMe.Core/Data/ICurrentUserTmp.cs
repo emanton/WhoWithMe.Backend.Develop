@@ -13,12 +13,12 @@ namespace WhoWithMe.Core.Data
 		string CurrentUserId { get; set; }
 	}
 
-	public abstract class CurrentUserTmp : ICurrentUserTmp
-	{
+	//public abstract class CurrentUserTmp : ICurrentUserTmp
+	//{
 
-		// TODO REMOVE DELETE
-		[NotMapped]
-		[JsonIgnore]
-		public string CurrentUserId { get; set; }
-	}
+	//	// TODO REMOVE DELETE
+	//	[NotMapped]
+	//	[JsonIgnore]
+	//	public string CurrentUserId { get; set; }
+	//}
 }

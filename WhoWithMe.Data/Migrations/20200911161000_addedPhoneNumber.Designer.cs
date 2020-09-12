@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WhoWithMe.Data;
 
 namespace WhoWithMe.Data.Migrations
 {
     [DbContext(typeof(EFDbContext))]
-    partial class EFDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200911161000_addedPhoneNumber")]
+    partial class addedPhoneNumber
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -230,9 +232,6 @@ namespace WhoWithMe.Data.Migrations
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("Experience")
-                        .HasColumnType("bigint");
-
                     b.Property<string>("FacebookId")
                         .HasColumnType("nvarchar(max)");
 
@@ -244,9 +243,6 @@ namespace WhoWithMe.Data.Migrations
 
                     b.Property<string>("Lastname")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("Money")
-                        .HasColumnType("float");
 
                     b.Property<string>("Nickname")
                         .HasColumnType("nvarchar(max)");

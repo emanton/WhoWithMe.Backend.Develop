@@ -15,6 +15,7 @@ using System.Text.Unicode;
 using WhoWithMe.Core.Data;
 using WhoWithMe.Services.Helpers;
 using WhoWithMe.Services.Exceptions;
+using WhoWithMe.DTO.Authorization;
 
 namespace WhoWithMe.Services.Implementation
 {
@@ -28,30 +29,33 @@ namespace WhoWithMe.Services.Implementation
 			_unitOfWork = unitOfWork;
 		}
 
-		public async Task<string> EmailRegister(LoginData loginData)
+		public async Task<UserWithToken> EmailRegister(LoginData loginData)
 		{
 			ValidatePassword(loginData.Password);
 			await ValidateEmail(loginData.Email);
 			User user = new User();
 			user.Email = loginData.Email;
-			user.Nickname = loginData.Email;
 			user.Password = EncodePassword(loginData.Password);
 			_unitOfWork.GetRepository<User>().Insert(user);
+			await _unitOfWork.SaveChangesAsync();
+			user.Nickname = "user" + user.Id;
+			_unitOfWork.GetRepository<User>().Update(user);
 			await _unitOfWork.SaveChangesAsync();
 			return await EmailLogin(loginData);		
 		}
 
-		public async Task<string> EmailLogin(LoginData loginData)
+		public async Task<UserWithToken> EmailLogin(LoginData loginData)
 		{
 			User user = await AuthenticateUser(loginData);
 			if (user == null)
 			{
 				throw new BadRequestException("Login or password are incorrect!");
 			}
-			return GenerateJWT(user);
+
+			return GetLoginResponse(user);
 		}
 
-		public async Task<string> FacebookLogin(string accessToken)
+		public async Task<UserWithToken> FacebookLogin(string accessToken)
 		{
 			FacebookUserInfoResult fbRes = await FacebookAuthorization.ValidateAccessTokenAsync(accessToken);
 			User user = await _unitOfWork.GetRepository<User>().GetSingleAsync(x => x.FacebookId == fbRes.Id);
@@ -61,19 +65,28 @@ namespace WhoWithMe.Services.Implementation
 				user = newUser;
 			}
 
-			return GenerateJWT(user);
+			return GetLoginResponse(user);
+		}
+
+		private UserWithToken GetLoginResponse(User user)
+		{
+			UserWithToken userWithToken = new UserWithToken(user);
+			userWithToken.Token = GenerateJWT(user);
+			return userWithToken;
 		}
 
 		private async Task<User> FacebookRegister(FacebookUserInfoResult fbRes)
 		{
 			User user = new User();
 			user.FacebookId = fbRes.Id;
-			user.Nickname = fbRes.Id;
 			user.Email = fbRes.Email;
 			user.Lastname = fbRes.LastName;
 			user.Firstname = fbRes.FirstName;
 			user.AvatarImageUrl = fbRes.Picture?.Data.Url;
 			_unitOfWork.GetRepository<User>().Insert(user);
+			await _unitOfWork.SaveChangesAsync();
+			user.Nickname = "user" + user.Id;
+			_unitOfWork.GetRepository<User>().Update(user);
 			await _unitOfWork.SaveChangesAsync();
 			return user;
 		}
@@ -102,7 +115,7 @@ namespace WhoWithMe.Services.Implementation
 				Subject = new ClaimsIdentity(
 					new Claim[]
 					{
-						new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
+						new Claim("UserId", user.Id.ToString()),
 						new Claim(JwtRegisteredClaimNames.Jti, new Guid().ToString())
 					}),
 				Expires = DateTime.Now.AddDays(1),

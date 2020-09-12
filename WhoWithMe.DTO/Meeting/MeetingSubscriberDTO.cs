@@ -7,7 +7,7 @@ using WhoWithMe.Core.Entities;
 
 namespace WhoWithMe.DTO.Meeting
 {
-	public class MeetingSubscriberDTO : CurrentUserTmp
+	public class MeetingSubscriberDTO// : CurrentUserTmp
 	{
 		public long UserId { get; set; }
 		public long MeetingId { get; set; }

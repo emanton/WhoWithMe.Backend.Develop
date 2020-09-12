@@ -6,7 +6,7 @@ using WhoWithMe.Core.Entities.dictionaries;
 
 namespace WhoWithMe.DTO.Meeting
 {
-	public class CityDTO : CurrentUserTmp
+	public class CityDTO// : CurrentUserTmp
 	{
 		public string Name { get; set; }
 		public City GetCity()

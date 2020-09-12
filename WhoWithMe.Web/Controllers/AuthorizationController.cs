@@ -28,13 +28,13 @@ namespace WhoWithMe.Web.Controllers
 		}
 		
 		[HttpPost("EmailRegister")]
-		public async Task<IActionResult> EmailRegister(LoginData loginData) => await WithoutJwtWrap(_authorizationService.EmailRegister, loginData);
+		public async Task<IActionResult> EmailRegister(LoginData loginData) => await Wrap(_authorizationService.EmailRegister, loginData);
 
 		[HttpPost("EmailLogin")]
-		public async Task<IActionResult> EmailLogin(LoginData loginData) => await WithoutJwtWrap(_authorizationService.EmailLogin, loginData);
+		public async Task<IActionResult> EmailLogin(LoginData loginData) => await Wrap(_authorizationService.EmailLogin, loginData);
 
 		[HttpPost("FacebookLogin")]
-		public async Task<IActionResult> FacebookLogin(string accessToken) => await WithoutJwtWrap(_authorizationService.FacebookLogin, accessToken);
+		public async Task<IActionResult> FacebookLogin(string accessToken) => await Wrap(_authorizationService.FacebookLogin, accessToken);
 
 		//[HttpPost("GmailLogin")]
 		//public async Task<IActionResult> GmailLogin(string authToken)

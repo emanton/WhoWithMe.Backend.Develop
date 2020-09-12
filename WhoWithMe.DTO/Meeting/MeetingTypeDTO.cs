@@ -4,7 +4,7 @@ using WhoWithMe.Core.Entities.dictionaries;
 
 namespace WhoWithMe.DTO.Meeting
 {
-	public class MeetingTypeDTO : CurrentUserTmp
+	public class MeetingTypeDTO //: CurrentUserTmp
 	{
 		public string Name { get; set; }
 

@@ -2,7 +2,7 @@
 using Core.Data.Repositories;
 using WhoWithMe.Core.Entities;
 using WhoWithMe.DTO.Model.Meeting;
-using WhoWithMe.DTO.Model.User;
+using WhoWithMe.DTO.UserDTOs;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;

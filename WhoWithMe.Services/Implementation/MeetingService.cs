@@ -16,9 +16,9 @@ using WhoWithMe.DTO;
 using WhoWithMe.DTO.Model;
 using WhoWithMe.Services.Exceptions;
 using WhoWithMe.Services.Interfaces;
-using WhoWithMe.DTO.Model.User;
 using WhoWithMe.Services.Helpers;
 using Microsoft.AspNetCore.Http;
+using WhoWithMe.DTO.UserDTOs;
 
 namespace WhoWithMe.Services.Implementation
 {
@@ -82,7 +82,7 @@ namespace WhoWithMe.Services.Implementation
             meetingView.ParticipantsCount = await GetMeetingParticipantsCount(meetingId);
             meetingView.SubscribersCount = await GetMeetingSubscribersCount(meetingId);
             meetingView.CommentsCount = await GetMeetingCommentsCount(meetingId);
-            meetingView.MeetingImages = await _meetingImageRepository.GetAllAsync(3,0, x => x.MeetingId == meetingId);
+            meetingView.MeetingImageUrls = (await _meetingImageRepository.GetAllAsync(6,0, x => x.MeetingId == meetingId)).Select(x=>x.ImageUrl).ToList();
             return meetingView;
         }
 
@@ -92,7 +92,7 @@ namespace WhoWithMe.Services.Implementation
             return await _meetingImageRepository.GetAllAsync(pagMet.Count, pagMet.Offset, x => x.MeetingId == pagMet.MeetingId);
         }
 
-        public async Task<int> AddMeeting(MeetingCreateDTO meetingDTO)
+        public async Task<int> AddMeeting(MeetingCreateDTO meetingDTO, long currentUserId)
         {
             Meeting meeting = meetingDTO.GetMeeting();
             _meetingRepository.Insert(meeting);
@@ -102,9 +102,10 @@ namespace WhoWithMe.Services.Implementation
             return res;
         }
 
-        public async Task<int> EditMeeting(MeetingEditDTO meetingDTO)
+        public async Task<int> EditMeeting(MeetingEditDTO meetingDTO, long currentUserId)
         {
-            _meetingRepository.Update(meetingDTO.GetMeeting());
+            Meeting meeting = meetingDTO.GetMeeting();
+            _meetingRepository.Update(meeting);
             int res = await _unitOfWork.SaveChangesAsync();
             await DeleteMeetingImages(meetingDTO.RemovedImageIds);
             await CreateMeetingImages(meetingDTO.Id, meetingDTO.MeetingImages);
@@ -132,9 +133,9 @@ namespace WhoWithMe.Services.Implementation
             return await _unitOfWork.SaveChangesAsync();
         }
 
-        private async Task<int> CreateMeetingImages(long meetingId, List<IFormFile> meetingImages)
+        private async Task<int> CreateMeetingImages(long meetingId, IEnumerable<IFormFile> meetingImages)
         {
-            if (meetingImages == null || meetingImages.Count == 0)
+            if (meetingImages == null)
             {
                 return 0;
             }
@@ -156,6 +157,11 @@ namespace WhoWithMe.Services.Implementation
 
         private async Task<int> DeleteMeetingImages(List<long> meetingImageIds)
         {
+            if (meetingImageIds == null)
+            {
+                return 0;
+            }
+
             foreach (long imageId in meetingImageIds)
             {
                 MeetingImage meetingImage = await _meetingImageRepository.GetSingleAsync(x => x.Id == imageId);

@@ -9,6 +9,6 @@ namespace WhoWithMe.DTO.Meeting
 {
 	public class MeetingCreateDTO : MeetingBaseDTO
 	{
-		public List<IFormFile> MeetingImages { get; set; }
+		public IEnumerable<IFormFile> MeetingImages { get; set; }
 	}
 }

@@ -1,8 +1,5 @@
 ﻿using WhoWithMe.Core.Entities.dictionaries;
-using System;
 using System.Collections.Generic;
-using System.Text;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace WhoWithMe.Core.Entities
@@ -11,6 +8,11 @@ namespace WhoWithMe.Core.Entities
     {
         public string AvatarImageUrl { get; set; }
         public string Nickname { get; set; }
+        public string InviterNickname { get; set; }
+        public long PhoneNumber { get; set; }
+        public long Experience { get; set; }
+        public double Money { get; set; }
+        public bool PhoneNumberConfirmed { get; set; }
         public string Firstname { get; set; }
         public string Lastname { get; set; }
         public string Email { get; set; }

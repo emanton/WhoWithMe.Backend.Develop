@@ -61,6 +61,7 @@ namespace WhoWithMe.Data
         public virtual DbSet<User> User { get; set; }
         public virtual DbSet<UserChat> UserChat { get; set; }
         public virtual DbSet<UserSubscriber> UserSubscriber { get; set; }
+        //public virtual DbSet<UserPhoneToConfirm> UserPhoneToConfirm { get; set; }
 
         public new DbSet<TEntity> Set<TEntity>() where TEntity : class, IBaseEntity
         {

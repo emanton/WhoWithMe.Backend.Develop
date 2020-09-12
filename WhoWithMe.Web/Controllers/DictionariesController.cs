@@ -19,15 +19,15 @@ namespace WhoWithMe.Web.Controllers
 		}
 
 		[HttpPost("GetMeetingTypes")]
-		public async Task<IActionResult> GetMeetingTypes() => await WithoutJwtWrap(_dictionaryService.GetMeetingTypes);
+		public async Task<IActionResult> GetMeetingTypes() => await Wrap(_dictionaryService.GetMeetingTypes);
 
 		[HttpPost("AddMeetingType")]
-		public async Task<IActionResult> AddMeetingType(MeetingTypeDTO meetingType) => await WithoutJwtWrap(_dictionaryService.AddMeetingType, meetingType);
+		public async Task<IActionResult> AddMeetingType(MeetingTypeDTO meetingType) => await Wrap(_dictionaryService.AddMeetingType, meetingType);
 
 		[HttpPost("GetCities")]
-		public async Task<IActionResult> GetCities() => await WithoutJwtWrap(_dictionaryService.GetCities);
+		public async Task<IActionResult> GetCities() => await Wrap(_dictionaryService.GetCities);
 
 		[HttpPost("AddCity")]
-		public async Task<IActionResult> AddCity(CityDTO city) => await WithoutJwtWrap(_dictionaryService.AddCity, city);
+		public async Task<IActionResult> AddCity(CityDTO city) => await Wrap(_dictionaryService.AddCity, city);
 	}
 }

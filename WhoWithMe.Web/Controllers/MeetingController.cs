@@ -14,7 +14,7 @@ using WhoWithMe.Services.Interfaces;
 using WhoWithMe.DTO.Model.Authorization;
 using WhoWithMe.Web.Models;
 using WhoWithMe.DTO.Meeting;
-using WhoWithMe.DTO.Model.User;
+using WhoWithMe.DTO.UserDTOs;
 using WhoWithMe.Core.Entities;
 using WhoWithMe.DTO.Model.Meeting;
 
@@ -42,10 +42,10 @@ namespace WhoWithMe.Web.Controllers
 		public async Task<IActionResult> GetMeeting(CurrentUserIdMeetingId meetingId) => await Wrap(_meetingService.GetMeeting, meetingId);
 
 		[HttpPost("AddMeeting")]
-		public async Task<IActionResult> AddMeeting(MeetingCreateDTO meeting) => await Wrap(_meetingService.AddMeeting, meeting);
+		public async Task<IActionResult> AddMeeting([FromForm] MeetingCreateDTO meeting) => await WrapWithCurrentUser(_meetingService.AddMeeting, meeting);
 
 		[HttpPost("EditMeeting")]
-		public async Task<IActionResult> EditMeeting(MeetingEditDTO meeting) => await Wrap(_meetingService.EditMeeting, meeting);
+		public async Task<IActionResult> EditMeeting([FromForm] MeetingEditDTO meeting) => await WrapWithCurrentUser(_meetingService.EditMeeting, meeting);
 
 		[HttpPost("DeleteMeeting")]
 		public async Task<IActionResult> DeleteMeeting(CurrentUserIdMeetingId meetingId) => await Wrap(_meetingService.DeleteMeeting, meetingId);

@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WhoWithMe.DTO.Meeting;
-using WhoWithMe.DTO.Model.User;
+using WhoWithMe.DTO.UserDTOs;
 
 namespace WhoWithMe.Services.Interfaces
 {
@@ -19,8 +19,8 @@ namespace WhoWithMe.Services.Interfaces
         Task<List<Meeting>> GetMeetingsByTypeAndTitleAndSortType(MeetingSearchDTO meetingSearchDTO);
         Task<List<Meeting>> GetMeetingsByOwner(PaginationUserId paginationUserId);
         Task<MeetingView> GetMeeting(CurrentUserIdMeetingId meetingId);
-        Task<int> AddMeeting(MeetingCreateDTO meeting);
-        Task<int> EditMeeting(MeetingEditDTO meeting);
+        Task<int> AddMeeting(MeetingCreateDTO meeting, long currentUserId);
+        Task<int> EditMeeting(MeetingEditDTO meeting, long currentUserId);
         Task<int> DeleteMeeting(CurrentUserIdMeetingId meeting);
     }
 }
