@@ -17,6 +17,8 @@ using WhoWithMe.DTO.Meeting;
 using WhoWithMe.DTO.UserDTOs;
 using WhoWithMe.Core.Entities;
 using WhoWithMe.DTO.Model.Meeting;
+using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 
 namespace WhoWithMe.Web.Controllers
 {
@@ -41,13 +43,16 @@ namespace WhoWithMe.Web.Controllers
 		[HttpPost("GetMeeting")]
 		public async Task<IActionResult> GetMeeting(CurrentUserIdMeetingId meetingId) => await Wrap(_meetingService.GetMeeting, meetingId);
 
-		[HttpPost("AddMeeting")]
-		public async Task<IActionResult> AddMeeting([FromForm] MeetingCreateDTO meeting) => await WrapWithCurrentUser(_meetingService.AddMeeting, meeting);
-
-		[HttpPost("EditMeeting")]
-		public async Task<IActionResult> EditMeeting([FromForm] MeetingEditDTO meeting) => await WrapWithCurrentUser(_meetingService.EditMeeting, meeting);
-
 		[HttpPost("DeleteMeeting")]
 		public async Task<IActionResult> DeleteMeeting(CurrentUserIdMeetingId meetingId) => await Wrap(_meetingService.DeleteMeeting, meetingId);
+
+		[HttpPost("AddMeeting")]
+		public async Task<IActionResult> AddMeeting([FromForm] MeetingCreateDTOTemp meeting) => await AddMeetingHelper(meeting.GetMeetingCreateDTO());
+
+		[HttpPost("EditMeeting")]
+		public async Task<IActionResult> EditMeeting([FromForm] MeetingEditDTOTemp meeting) => await EditMeetingHelper(meeting.GetMeetingEditDTO());
+		private async Task<IActionResult> AddMeetingHelper(MeetingCreateDTO meeting) => await WrapWithCurrentUser(_meetingService.AddMeeting, meeting);
+
+		private async Task<IActionResult> EditMeetingHelper(MeetingEditDTO meeting) => await WrapWithCurrentUser(_meetingService.EditMeeting, meeting);
 	}
 }

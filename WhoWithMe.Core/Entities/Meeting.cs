@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using WhoWithMe.Core.Data;
 using System.Text.Json.Serialization;
+using System;
 
 namespace WhoWithMe.Core.Entities
 {
@@ -12,6 +13,9 @@ namespace WhoWithMe.Core.Entities
         public string AvatarImageUrl { get; set; }
         public string Description { get; set; }
 		public string Requirements { get; set; }
+		public string Address { get; set; }
+		public DateTime CreatedDate { get; set; }
+		public DateTime StartDate { get; set; }
 		public double Latitude { get; set; }
 		public double Longitude { get; set; }
 		[ForeignKey("Creator")]
