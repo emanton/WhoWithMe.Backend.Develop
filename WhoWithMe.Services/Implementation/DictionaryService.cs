@@ -30,6 +30,7 @@ namespace WhoWithMe.Services.Implementation
 
         public async Task<List<MeetingType>> GetMeetingTypes()
         {
+            var asd = await _meetingTypeRepository.GetAllAsync();
             return await _meetingTypeRepository.GetAllAsync();
         }
 

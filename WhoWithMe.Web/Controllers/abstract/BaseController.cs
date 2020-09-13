@@ -90,6 +90,24 @@ namespace WhoWithMe.Web.Controllers
 			return new JsonResult(response);
 		}
 
+		protected async Task<IActionResult> Wrap<MOut>(Func<Task<MOut>> method)
+		{
+			ResponseWrapper<MOut> response = new ResponseWrapper<MOut>();
+			try
+			{
+				response.Data = await method.Invoke();
+			}
+			catch (BadRequestException ex)
+			{
+				response.SetError(ex.Message, ex.Status);
+			}
+			catch (Exception ex)
+			{
+				response.SetError(ex.Message + ex.InnerException);
+			}
+			return new JsonResult(response);
+		}
+
 		protected async Task<IActionResult> Wrap(Func<Task> method)
 		{
 			ResponseWrapper response = new ResponseWrapper();
