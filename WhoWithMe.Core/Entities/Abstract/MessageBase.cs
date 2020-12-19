@@ -7,8 +7,13 @@ namespace WhoWithMe.Core.Entities
 {
     public class MessageBase : BaseEntity
     {
-		public virtual UserChat Chat { get; set; }
+		[ForeignKey("Sender")]
+		public long SenderId { get; set; }
+		[ForeignKey("Receiver")]
+		public long ReceiverId { get; set; }
 		public string Text { get; set; }
 		public DateTime Created { get; set; }
+		public virtual User Sender { get; set; }
+		public virtual User Receiver { get; set; }
 	}
 }

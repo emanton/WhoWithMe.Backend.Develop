@@ -21,6 +21,15 @@ namespace WhoWithMe.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Message>()
+            .HasOne(b => b.Sender)
+            .WithMany(a => a.SentMessages);
+
+            modelBuilder.Entity<Message>()
+            .HasOne(b => b.Receiver)
+            .WithMany(a => a.ReceivedMessages);
+
+
             modelBuilder.Entity<MeetingSubscriber>()
             .HasOne(b => b.Meeting)
             .WithMany(a => a.MeetingSubscribers)
@@ -42,8 +51,6 @@ namespace WhoWithMe.Data
 				entity.HasIndex(e => new { e.MeetingId, e.UserId }).IsUnique();
 			});
 
-            
-
             base.OnModelCreating(modelBuilder);
         }
         
@@ -59,7 +66,6 @@ namespace WhoWithMe.Data
         public virtual DbSet<Message> Message { get; set; }
         public virtual DbSet<UnreadMessage> UnreadMessage { get; set; }
         public virtual DbSet<User> User { get; set; }
-        public virtual DbSet<UserChat> UserChat { get; set; }
         public virtual DbSet<UserSubscriber> UserSubscriber { get; set; }
         //public virtual DbSet<UserPhoneToConfirm> UserPhoneToConfirm { get; set; }
 

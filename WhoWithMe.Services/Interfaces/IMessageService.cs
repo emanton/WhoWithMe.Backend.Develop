@@ -11,12 +11,8 @@ namespace WhoWithMe.Services.Interfaces
 {
     public interface IMessageService
     {
-        Task<UserChat> GetUserChats(int userId, int count, int offset);
-
         Task<List<UnreadMessage>> GetUserUnreadMessagesByChatId(int chatId, int count, int offset);
-
         Task<int> DeleteUnreadMessagesByChatId(List<UnreadMessage> unreadMessages);
-
         Task<int> CreateMessage(Message message);
     }
 }

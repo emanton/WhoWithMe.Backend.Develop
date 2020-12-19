@@ -118,15 +118,15 @@ namespace WhoWithMe.Web
 
 		private string GetConnectionString()
 		{
-			return "Server=tcp:whowithme.database.windows.net,1433;Initial Catalog = WhoWithMe; Persist Security Info=False;User ID = whowithmekim; Password=Qwerty11;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout = 30;";
-			//return new SqlConnectionStringBuilder
-			//{
-			//	//UserID = "whowithmekim@whowithme",
-			//	//Password = "Qwerty11",
-			//	DataSource = "DESKTOP-4RLP2RM",
-			//	InitialCatalog = "WhoWithMeDBDevelop",
-			//	IntegratedSecurity = true,
-			//}.ConnectionString;
+			//return "Server=tcp:whowithme.database.windows.net,1433;Initial Catalog = WhoWithMe; Persist Security Info=False;User ID = whowithmekim; Password=Qwerty11;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout = 30;";
+			return new SqlConnectionStringBuilder
+			{
+				//UserID = "whowithmekim@whowithme",
+				//Password = "Qwerty11",
+				DataSource = "DESKTOP-4RLP2RM",
+				InitialCatalog = "WhoWithMeDBDevelop",
+				IntegratedSecurity = true,
+			}.ConnectionString;
 		}
 	}
 }

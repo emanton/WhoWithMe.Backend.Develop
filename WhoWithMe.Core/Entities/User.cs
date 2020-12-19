@@ -24,5 +24,9 @@ namespace WhoWithMe.Core.Entities
         public string GmailId { get; set; }
         [JsonIgnore]
         public virtual List<MeetingSubscriber> MeetingSubscribers { get; set; }
+        [JsonIgnore]
+        public virtual List<Message> SentMessages { get; set; }
+        [JsonIgnore]
+        public virtual List<Message> ReceivedMessages { get; set; }
     }
 }
