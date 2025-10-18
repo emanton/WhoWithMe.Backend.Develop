@@ -4,6 +4,9 @@ using WhoWithMe.DTO.UserDTOs;
 using WhoWithMe.DTO.Meeting;
 using WhoWithMe.DTO.Meeting.Abstract;
 using WhoWithMe.DTO.Authorization;
+using WhoWithMe.Core.Entities.dictionaries;
+using WhoWithMe.DTO.Meeting; 
+using WhoWithMe.DTO.Meeting;
 
 namespace WhoWithMe.Services.Mapping
 {
@@ -25,6 +28,13 @@ namespace WhoWithMe.Services.Mapping
 
             // Map Meeting entity to MeetingView DTO
             CreateMap<Meeting, MeetingView>().ConstructUsing(m => new MeetingView(m));
+
+            // Map MeetingType and City DTOs
+            CreateMap<MeetingTypeDTO, MeetingType>();
+            CreateMap<MeetingType, MeetingTypeDTO>();
+
+            CreateMap<CityDTO, City>();
+            CreateMap<City, CityDTO>();
 
             // Additional mappings as needed
         }
