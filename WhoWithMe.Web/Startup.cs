@@ -103,6 +103,28 @@ namespace WhoWithMe.Web
 				app.UseDeveloperExceptionPage();
 			}
 
+			// Run migrations and seed DB in development only
+			if (env.IsDevelopment())
+			{
+				using (var scope = app.ApplicationServices.CreateScope())
+				{
+					var services = scope.ServiceProvider;
+					var logger = services.GetService<ILogger<Startup>>();
+					try
+					{
+						var context = services.GetRequiredService<EFDbContext>();
+						context.Database.Migrate();
+						DataSeeder.SeedAsync(context).GetAwaiter().GetResult();
+						logger?.LogInformation("Database migrated and seeded successfully.");
+					}
+					catch (Exception ex)
+					{
+						// Log and continue. In production prefer running migrations from deployment pipeline.
+						logger?.LogError(ex, "An error occurred while migrating or seeding the database.");
+					}
+				}
+			}
+
 			app.UseHttpsRedirection();
 
 			app.UseRouting();
@@ -116,17 +138,31 @@ namespace WhoWithMe.Web
 			});
 		}
 
-		private string GetConnectionString()
-		{
-			//return "Server=tcp:whowithme.database.windows.net,1433;Initial Catalog = WhoWithMe; Persist Security Info=False;User ID = whowithmekim; Password=Qwerty11;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout = 30;";
-			return new SqlConnectionStringBuilder
-			{
-				//UserID = "whowithmekim@whowithme",
-				//Password = "Qwerty11",
-				DataSource = "DESKTOP-4RLP2RM",
-				InitialCatalog = "WhoWithMeDBDevelop",
-				IntegratedSecurity = true,
-			}.ConnectionString;
-		}
+        // TODO refactor. (use connection string from enviroment variables)
+        private string GetConnectionString()
+        {
+            //// Prefer a full connection string in configuration first
+            //var configured = Configuration.GetConnectionString("DefaultConnection");
+            //if (!string.IsNullOrWhiteSpace(configured))
+            //{
+            //    return configured;
+            //}
+
+            //// Fallback to individual settings (use user secrets or environment variables in development)
+            var dataSource = Configuration["Db:DataSource"];
+            var user = Configuration["Db:User"];
+            var password = Configuration["Db:Password"];
+            var initialCatalog = Configuration["Db:InitialCatalog"];
+
+            var builder = new SqlConnectionStringBuilder
+            {
+                DataSource = dataSource,
+                UserID = user,
+                Password = password,
+                InitialCatalog = initialCatalog,
+            };
+
+            return builder.ConnectionString;
+        }
 	}
 }
