@@ -4,22 +4,21 @@ using Microsoft.AspNetCore.Http;
 using WhoWithMe.Services.Interfaces;
 using WhoWithMe.Core.Entities;
 using WhoWithMe.Core.Data;
-using Core.Data.Repositories;
+using WhoWithMe.Data;
 using System.Linq;
 using WhoWithMe.Services.Helpers;
+using Microsoft.EntityFrameworkCore;
 using WhoWithMe.DTO.Model.Meeting;
 
 namespace WhoWithMe.Services.Implementation
 {
     public class MeetingImageService : IMeetingImageService
     {
-        private readonly IRepository<MeetingImage> _meetingImageRepository;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IContext _context;
 
-        public MeetingImageService(IUnitOfWork unitOfWork)
+        public MeetingImageService(IContext context)
         {
-            _unitOfWork = unitOfWork;
-            _meetingImageRepository = _unitOfWork.GetRepository<MeetingImage>();
+            _context = context;
         }
 
         public async Task<int> CreateMeetingImages(long meetingId, IEnumerable<IFormFile> meetingImages)
@@ -30,10 +29,10 @@ namespace WhoWithMe.Services.Implementation
             {
                 string imageUrl = await S3StorageService.UploadMeetingFile(meetingId, formFile);
                 var meetingImage = new MeetingImage { ImageUrl = imageUrl, MeetingId = meetingId };
-                _meetingImageRepository.Insert(meetingImage);
+                _context.SetAsAdded(meetingImage);
             }
 
-            return await _unitOfWork.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<int> DeleteMeetingImages(List<long> meetingImageIds)
@@ -42,19 +41,23 @@ namespace WhoWithMe.Services.Implementation
 
             foreach (var id in meetingImageIds)
             {
-                var meetingImage = await _meetingImageRepository.GetSingleAsync(x => x.Id == id);
+                var meetingImage = await _context.Set<MeetingImage>().FirstOrDefaultAsync(x => x.Id == id);
                 if (meetingImage != null)
                 {
-                    _meetingImageRepository.Delete(meetingImage);
+                    _context.SetAsDeleted(meetingImage);
                 }
             }
 
-            return await _unitOfWork.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<List<MeetingImage>> GetMeetingImages(PaginationMeetingId pagMet)
         {
-            return await _meetingImageRepository.GetAllAsync(pagMet.Count, pagMet.Offset, x => x.MeetingId == pagMet.MeetingId);
+            return await _context.Set<MeetingImage>()
+                .Where(x => x.MeetingId == pagMet.MeetingId)
+                .Skip(pagMet.Offset)
+                .Take(pagMet.Count)
+                .ToListAsync();
         }
     }
 }

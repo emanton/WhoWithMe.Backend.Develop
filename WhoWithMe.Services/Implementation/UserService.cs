@@ -13,24 +13,26 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.AspNetCore.Server.IIS;
 using WhoWithMe.Services.Exceptions;
 using WhoWithMe.DTO.UserDTOs;
+using WhoWithMe.Data.Repositories;
+using WhoWithMe.Data;
 
 namespace WhoWithMe.Services.Implementation
 {
     public class UserService : IUserService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IContext _context;
         private readonly IRepository<User> _userRepository;
         private readonly IRepository<UserSubscriber> _userSubscriberRepository;
         private readonly IRepository<MeetingSubscriber> _subscriberMeetingRepository;
         private readonly IRepository<UserPhoneToConfirm> _userPhoneToConfirmRepository;
-        
-        public UserService(IUnitOfWork unitOfWork)
+
+        public UserService(IContext context)
         {
-            _unitOfWork = unitOfWork;
-            _userRepository = unitOfWork.GetRepository<User>();
-            _userSubscriberRepository = unitOfWork.GetRepository<UserSubscriber>();
-            _subscriberMeetingRepository = unitOfWork.GetRepository<MeetingSubscriber>();
-            _userPhoneToConfirmRepository = unitOfWork.GetRepository<UserPhoneToConfirm>();
+            _context = context;
+            _userRepository = new EntityRepository<User>(context);
+            _userSubscriberRepository = new EntityRepository<UserSubscriber>(context);
+            _subscriberMeetingRepository = new EntityRepository<MeetingSubscriber>(context);
+            _userPhoneToConfirmRepository = new EntityRepository<UserPhoneToConfirm>(context);
         }
 
         public async Task<List<UserSubscriber>> GetSubscribedUsers(int userId, int count, int offset) // return users? // design
@@ -52,24 +54,24 @@ namespace WhoWithMe.Services.Implementation
         public async Task<int> EditUserInfo(UserDTO user)
         {
             _userRepository.Update(user.GetUser());
-            return await _unitOfWork.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<List<UserDTO>> GetUsers(FromToLong fromTo)
         {
-            List<User> users = await _unitOfWork.GetRepository<User>().GetAllAsync(x => x.Id > fromTo.From && x.Id < fromTo.To);
+            List<User> users = await new EntityRepository<User>(_context).GetAllAsync(x => x.Id > fromTo.From && x.Id < fromTo.To);
             return users.Select(x => new UserDTO(x)).ToList();
         }
 
         public async Task<bool> DeleteUser(long id)
         {
-			User user = await _unitOfWork.GetRepository<User>().GetSingleAsync(x => x.Id == id);
+            User user = await new EntityRepository<User>(_context).GetSingleAsync(x => x.Id == id);
             if (user == null)
-			{
+            {
                 throw new BadRequestException("User not found");
-			}
+            }
             _userRepository.Delete(user);
-            await _unitOfWork.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             return true;
         }
         // hide profile
@@ -87,7 +89,7 @@ namespace WhoWithMe.Services.Implementation
             };
 
             _userPhoneToConfirmRepository.Insert(userPhoneToConfirm);
-            await _unitOfWork.SaveChangesAsync();
+            await _context.SaveChangesAsync();
             // send confirmPassword to phone TODO REDO
             return true;
         }
@@ -95,17 +97,17 @@ namespace WhoWithMe.Services.Implementation
         public async Task<bool> ConfirmPhoneNumberPassword(PhoneConfirmPassword phoneConfirmPassword)
         {
             Random r = new Random();
-			List<UserPhoneToConfirm> phoneToConfirm = await _userPhoneToConfirmRepository.FindByAsync(x =>
+            List<UserPhoneToConfirm> phoneToConfirm = await _userPhoneToConfirmRepository.FindByAsync(x =>
             x.DateTimeCreated > DateTime.Now.AddDays(-1)
             && x.UserId == phoneConfirmPassword.UserId
             && x.PhoneNumber == phoneConfirmPassword.PhoneNumber
             && x.ConfirmPassword == phoneConfirmPassword.ConfirmPassword);
             if (phoneToConfirm?.Count > 0)
-			{
+            {
                 User user = await _userRepository.GetSingleAsync(phoneConfirmPassword.UserId);
                 user.PhoneNumber = phoneConfirmPassword.PhoneNumber;
                 user.PhoneNumberConfirmed = true;
-                await _unitOfWork.SaveChangesAsync();
+                await _context.SaveChangesAsync();
                 return true;
             }
 

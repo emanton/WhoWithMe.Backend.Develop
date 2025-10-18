@@ -16,17 +16,19 @@ using WhoWithMe.Core.Data;
 using WhoWithMe.Services.Helpers;
 using WhoWithMe.Services.Exceptions;
 using WhoWithMe.DTO.Authorization;
+using WhoWithMe.Data.Repositories;
+using WhoWithMe.Data;
 
 namespace WhoWithMe.Services.Implementation
 {
 	// Forgot Password
 	public class AuthenticationService : IAuthenticationService
 	{
-		private readonly IUnitOfWork _unitOfWork;
+		private readonly IContext _context;
 
-		public AuthenticationService(IUnitOfWork unitOfWork)
+		public AuthenticationService(IContext context)
 		{
-			_unitOfWork = unitOfWork;
+			_context = context;
 		}
 
 		public async Task<UserWithToken> EmailRegister(LoginData loginData)
@@ -36,12 +38,12 @@ namespace WhoWithMe.Services.Implementation
 			User user = new User();
 			user.Email = loginData.Email;
 			user.Password = EncodePassword(loginData.Password);
-			_unitOfWork.GetRepository<User>().Insert(user);
-			await _unitOfWork.SaveChangesAsync();
+			new EntityRepository<User>(_context).Insert(user);
+			await _context.SaveChangesAsync();
 			user.Nickname = "user" + user.Id;
-			_unitOfWork.GetRepository<User>().Update(user);
-			await _unitOfWork.SaveChangesAsync();
-			return await EmailLogin(loginData);		
+			new EntityRepository<User>(_context).Update(user);
+			await _context.SaveChangesAsync();
+			return await EmailLogin(loginData);
 		}
 
 		public async Task<UserWithToken> EmailLogin(LoginData loginData)
@@ -58,7 +60,7 @@ namespace WhoWithMe.Services.Implementation
 		public async Task<UserWithToken> FacebookLogin(string accessToken)
 		{
 			FacebookUserInfoResult fbRes = await FacebookAuthorization.ValidateAccessTokenAsync(accessToken);
-			User user = await _unitOfWork.GetRepository<User>().GetSingleAsync(x => x.FacebookId == fbRes.Id);
+			User user = await new EntityRepository<User>(_context).GetSingleAsync(x => x.FacebookId == fbRes.Id);
 			if (user == null)
 			{
 				User newUser = await FacebookRegister(fbRes);
@@ -83,11 +85,11 @@ namespace WhoWithMe.Services.Implementation
 			user.Lastname = fbRes.LastName;
 			user.Firstname = fbRes.FirstName;
 			user.AvatarImageUrl = fbRes.Picture?.Data.Url;
-			_unitOfWork.GetRepository<User>().Insert(user);
-			await _unitOfWork.SaveChangesAsync();
+			new EntityRepository<User>(_context).Insert(user);
+			await _context.SaveChangesAsync();
 			user.Nickname = "user" + user.Id;
-			_unitOfWork.GetRepository<User>().Update(user);
-			await _unitOfWork.SaveChangesAsync();
+			new EntityRepository<User>(_context).Update(user);
+			await _context.SaveChangesAsync();
 			return user;
 		}
 
@@ -99,7 +101,7 @@ namespace WhoWithMe.Services.Implementation
 		private async Task<User> GetUserByLoginData(LoginData loginData)
 		{
 			string encodedPassword = EncodePassword(loginData.Password);
-			return await _unitOfWork.GetRepository<User>().GetSingleAsync(x => x.Email == loginData.Email && x.Password == encodedPassword);
+			return await new EntityRepository<User>(_context).GetSingleAsync(x => x.Email == loginData.Email && x.Password == encodedPassword);
 		}
 
 		private string GenerateJWT(User user)
@@ -153,7 +155,7 @@ namespace WhoWithMe.Services.Implementation
 				throw new BadRequestException("not valid email");
 			}
 
-			var user = await _unitOfWork.GetRepository<User>().GetSingleAsync(x => x.Email == email);
+			var user = await new EntityRepository<User>(_context).GetSingleAsync(x => x.Email == email);
 			if (user != null)
 			{
 				throw new BadRequestException("email has already existed");

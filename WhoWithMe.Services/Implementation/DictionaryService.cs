@@ -10,22 +10,24 @@ using WhoWithMe.DTO.Meeting;
 using WhoWithMe.DTO.Model.Meeting;
 using WhoWithMe.Services.Exceptions;
 using WhoWithMe.Services.Interfaces;
+using WhoWithMe.Data.Repositories;
+using WhoWithMe.Data;
 
 
 namespace WhoWithMe.Services.Implementation
 {
 	public class DictionaryService : IDictionaryService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IContext _context;
         private readonly IRepository<MeetingType> _meetingTypeRepository;
         private readonly IRepository<City> _cityRepository;
 
 
-        public DictionaryService(IUnitOfWork unitOfWork)
+        public DictionaryService(IContext context)
         {
-            _unitOfWork = unitOfWork;
-            _meetingTypeRepository = unitOfWork.GetRepository<MeetingType>();
-            _cityRepository = unitOfWork.GetRepository<City>();
+            _context = context;
+            _meetingTypeRepository = new EntityRepository<MeetingType>(context);
+            _cityRepository = new EntityRepository<City>(context);
         }
 
         public async Task<List<MeetingType>> GetMeetingTypes()
@@ -37,7 +39,7 @@ namespace WhoWithMe.Services.Implementation
         public async Task<int> AddMeetingType(MeetingTypeDTO meetingType)
         {
             _meetingTypeRepository.Insert(meetingType.GetMeetingType());
-            return await _unitOfWork.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<List<City>> GetCities()
@@ -48,7 +50,7 @@ namespace WhoWithMe.Services.Implementation
         public async Task<int> AddCity(CityDTO meetingType)
         {
             _cityRepository.Insert(meetingType.GetCity());
-            return await _unitOfWork.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
     }
 }

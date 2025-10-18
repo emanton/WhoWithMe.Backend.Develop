@@ -51,7 +51,7 @@ namespace WhoWithMe.Web
 			string connectionString = GetConnectionString();
 			services.AddDbContext<EFDbContext>(options => options.UseSqlServer(connectionString));
 			services.AddTransient<IContext, EFDbContext>();
-			services.AddScoped<IUnitOfWork, UnitOfWork>();
+			services.AddScoped<IMeetingImageService, MeetingImageService>();
 			services.AddScoped<IAuthenticationService, AuthenticationService>();
 			services.AddScoped<IUserService, UserService>();
 			services.AddScoped<IMeetingService, MeetingService>();

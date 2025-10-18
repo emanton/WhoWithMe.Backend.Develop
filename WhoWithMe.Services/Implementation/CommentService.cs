@@ -10,37 +10,39 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using WhoWithMe.Core.Data;
+using WhoWithMe.Data.Repositories;
+using WhoWithMe.Data;
 
 namespace WhoWithMe.Services.Implementation
 {
     public class CommentService : ICommentService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IContext _context;
         private readonly IRepository<CommentUser> _commentUserRepository;
         private readonly IRepository<CommentMeeting> _commentMeetingRepository;
 
-        public CommentService(IUnitOfWork unitOfWork)
+        public CommentService(IContext context)
         {
-            _unitOfWork = unitOfWork;
-            _commentUserRepository = unitOfWork.GetRepository<CommentUser>();
-            _commentMeetingRepository = unitOfWork.GetRepository<CommentMeeting>();
+            _context = context;
+            _commentUserRepository = new EntityRepository<CommentUser>(context);
+            _commentMeetingRepository = new EntityRepository<CommentMeeting>(context);
         }
         // user
         public async Task<List<CommentUser>> GetUserComments(PaginationUserId paginationUserId)
-		{
+        {
             return await _commentUserRepository.GetAllAsync(paginationUserId.Count, paginationUserId.Offset, x => x.UserToId == paginationUserId.UserId);
         }
 
         public async Task<int> AddUserComments(CommentUser commentUser)
         {
             _commentUserRepository.Insert(commentUser);
-            return await _unitOfWork.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<int> DeleteUserComments(CommentUser commentUser)
         {
             _commentUserRepository.Delete(commentUser);
-            return await _unitOfWork.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
         // meeting
@@ -51,15 +53,15 @@ namespace WhoWithMe.Services.Implementation
         public async Task<int> AddMeetingComments(CommentMeeting commentMeeting)
         {
             _commentMeetingRepository.Insert(commentMeeting);
-            return await _unitOfWork.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
         public async Task<int> DeleteMeetingComments(CommentMeeting commentMeeting)
         {
             _commentMeetingRepository.Delete(commentMeeting);
-            return await _unitOfWork.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
-		
-	}
+
+    }
 }

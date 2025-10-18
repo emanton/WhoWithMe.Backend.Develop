@@ -1,27 +1,26 @@
-﻿using Core.Data;
-using Core.Data.Repositories;
+﻿using Core.Data.Repositories;
 using WhoWithMe.Core.Entities;
 using WhoWithMe.Core.Entities.dictionaries;
-using WhoWithMe.DTO.Model.Meeting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using WhoWithMe.Core.Data;
 using WhoWithMe.DTO.Meeting;
-using WhoWithMe.DTO;
 using WhoWithMe.DTO.Model;
 using WhoWithMe.Services.Exceptions;
 using WhoWithMe.Services.Interfaces;
 using WhoWithMe.Services.Helpers;
 using Microsoft.AspNetCore.Http;
+using WhoWithMe.Core.Data;
 using WhoWithMe.DTO.UserDTOs;
+using WhoWithMe.Data.Repositories;
+using WhoWithMe.Data;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using WhoWithMe.DTO.Model.Meeting;
 
 namespace WhoWithMe.Services.Implementation
 {
     public class MeetingService : IMeetingService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IContext _context;
         private readonly IRepository<MeetingType> _meetingTypeRepository;
         private readonly IRepository<City> _cityRepository;
         private readonly IRepository<Meeting> _meetingRepository;
@@ -30,19 +29,18 @@ namespace WhoWithMe.Services.Implementation
         private readonly IRepository<CommentMeeting> _commentMeetingRepository;
         private readonly IMeetingImageService _meetingImageService;
 
-        public MeetingService(IUnitOfWork unitOfWork, IMeetingImageService meetingImageService)
+        public MeetingService(IContext context, IMeetingImageService meetingImageService)
         {
-            _unitOfWork = unitOfWork;
-            _meetingTypeRepository = unitOfWork.GetRepository<MeetingType>();
-            _meetingRepository = unitOfWork.GetRepository<Meeting>();
-            _meetingImageRepository = unitOfWork.GetRepository<MeetingImage>();
-            _meetingSubscriberRepository = unitOfWork.GetRepository<MeetingSubscriber>();
-            _commentMeetingRepository = unitOfWork.GetRepository<CommentMeeting>();
-            _cityRepository = unitOfWork.GetRepository<City>();
+            _context = context;
+            _meetingTypeRepository = new EntityRepository<MeetingType>(context);
+            _meetingRepository = new EntityRepository<Meeting>(context);
+            _meetingImageRepository = new EntityRepository<MeetingImage>(context);
+            _meetingSubscriberRepository = new EntityRepository<MeetingSubscriber>(context);
+            _commentMeetingRepository = new EntityRepository<CommentMeeting>(context);
+            _cityRepository = new EntityRepository<City>(context);
             _meetingImageService = meetingImageService;
         }
 
-        // add sortType TODO
         public async Task<List<Meeting>> GetMeetingsByTypeAndTitleAndSortType(MeetingSearchDTO meetingSearchDTO)
         {
             if (meetingSearchDTO.MeetingTypeIds == null || meetingSearchDTO.MeetingTypeIds.Count == 0)
@@ -72,7 +70,6 @@ namespace WhoWithMe.Services.Implementation
             meetingView.ParticipantsCount = await GetMeetingParticipantsCount(meetingId);
             meetingView.SubscribersCount = await GetMeetingSubscribersCount(meetingId);
             meetingView.CommentsCount = await GetMeetingCommentsCount(meetingId);
-            // PaginationMeetingId.MeetingId is int, cast from long
             meetingView.MeetingImageUrls = (await _meetingImageService.GetMeetingImages(new PaginationMeetingId { MeetingId = (int)meetingId, Count = 6, Offset = 0 })).Select(x => x.ImageUrl).ToList();
             return meetingView;
         }
@@ -81,7 +78,7 @@ namespace WhoWithMe.Services.Implementation
         {
             Meeting meeting = meetingDTO.GetMeeting();
             _meetingRepository.Insert(meeting);
-            int res = await _unitOfWork.SaveChangesAsync();
+            int res = await _context.SaveChangesAsync();
             await _meetingImageService.CreateMeetingImages(meeting.Id, meetingDTO.MeetingImages);
             return res;
         }
@@ -90,7 +87,7 @@ namespace WhoWithMe.Services.Implementation
         {
             Meeting meeting = meetingDTO.GetMeeting();
             _meetingRepository.Update(meeting);
-            int res = await _unitOfWork.SaveChangesAsync();
+            int res = await _context.SaveChangesAsync();
             await _meetingImageService.DeleteMeetingImages(meetingDTO.RemovedImageIds);
             await _meetingImageService.CreateMeetingImages(meetingDTO.Id, meetingDTO.MeetingImages);
             return res;
@@ -104,15 +101,15 @@ namespace WhoWithMe.Services.Implementation
                 throw new BadRequestException("meeting not found");
             }
 
-            var subscribers = await _unitOfWork.GetRepository<MeetingSubscriber>().FindByAsync(x => x.MeetingId == meetingId.MeetingId);
-            var meetingImages = await _unitOfWork.GetRepository<MeetingImage>().FindByAsync(x => x.MeetingId == meetingId.MeetingId);
+            var subscribers = await _meetingSubscriberRepository.FindByAsync(x => x.MeetingId == meetingId.MeetingId);
+            var meetingImages = await _meetingImageRepository.FindByAsync(x => x.MeetingId == meetingId.MeetingId);
             var meetingImageIds = meetingImages.Select(x => x.Id).ToList();
 
             await _meetingImageService.DeleteMeetingImages(meetingImageIds);
-            foreach (var sub in subscribers) _unitOfWork.GetRepository<MeetingSubscriber>().Delete(sub);
+            foreach (var sub in subscribers) _meetingSubscriberRepository.Delete(sub);
 
             _meetingRepository.Delete(meeting);
-            return await _unitOfWork.SaveChangesAsync();
+            return await _context.SaveChangesAsync();
         }
 
         private async Task<int> GetMeetingParticipantsCount(long meetingId)
