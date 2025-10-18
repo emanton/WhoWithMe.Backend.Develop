@@ -10,7 +10,6 @@ using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
 using WhoWithMe.Core.Data;
-using WhoWithMe.Data.Repositories;
 using WhoWithMe.Data;
 
 namespace WhoWithMe.Services.Implementation
@@ -21,11 +20,11 @@ namespace WhoWithMe.Services.Implementation
         private readonly IRepository<CommentUser> _commentUserRepository;
         private readonly IRepository<CommentMeeting> _commentMeetingRepository;
 
-        public CommentService(IContext context)
+        public CommentService(IContext context, IRepository<CommentUser> commentUserRepository, IRepository<CommentMeeting> commentMeetingRepository)
         {
             _context = context;
-            _commentUserRepository = new EntityRepository<CommentUser>(context);
-            _commentMeetingRepository = new EntityRepository<CommentMeeting>(context);
+            _commentUserRepository = commentUserRepository;
+            _commentMeetingRepository = commentMeetingRepository;
         }
         // user
         public async Task<List<CommentUser>> GetUserComments(PaginationUserId paginationUserId)

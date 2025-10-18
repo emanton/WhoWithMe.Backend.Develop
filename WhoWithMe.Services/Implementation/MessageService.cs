@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WhoWithMe.Core.Data;
-using WhoWithMe.Data.Repositories;
 using WhoWithMe.Data;
 
 namespace WhoWithMe.Services.Implementation
@@ -18,11 +17,11 @@ namespace WhoWithMe.Services.Implementation
         private readonly IRepository<Message> _messageRepository;
         private readonly IRepository<UnreadMessage> _unreadMessageRepository;
 
-        public MessageService(IContext context)
+        public MessageService(IContext context, IRepository<Message> messageRepository, IRepository<UnreadMessage> unreadMessageRepository)
         {
             _context = context;
-            _messageRepository = new EntityRepository<Message>(context);
-            _unreadMessageRepository = new EntityRepository<UnreadMessage>(context);
+            _messageRepository = messageRepository;
+            _unreadMessageRepository = unreadMessageRepository;
         }
 
         public async Task<int> CreateMessage(Message message)

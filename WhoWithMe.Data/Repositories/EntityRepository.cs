@@ -127,7 +127,7 @@ namespace WhoWithMe.Data.Repositories
         // my
 
   //      public async Task<List<TEntity>> GetAllAsync(int count, int offset, Expression<Func<TEntity, DateTime>> keySelector,
-		//	Expression<Func<TEntity, bool>> predicate, OrderBy orderBy, params Expression<Func<TEntity, object>>[] includeProperties)
+			//	Expression<Func<TEntity, bool>> predicate, OrderBy orderBy, params Expression<Func<TEntity, object>>[] includeProperties)
 		//{
 		//	var entities = FilterQuery(keySelector, predicate, orderBy, includeProperties);
 
@@ -189,9 +189,10 @@ namespace WhoWithMe.Data.Repositories
 
         public virtual void Dispose(bool disposing)
         {
+            // Do not dispose the context here; DI container manages context lifetime.
             if (!_disposed && disposing)
             {
-                _context.Dispose();
+                // no-op
             }
             _disposed = true;
         }

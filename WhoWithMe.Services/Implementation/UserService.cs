@@ -26,13 +26,17 @@ namespace WhoWithMe.Services.Implementation
         private readonly IRepository<MeetingSubscriber> _subscriberMeetingRepository;
         private readonly IRepository<UserPhoneToConfirm> _userPhoneToConfirmRepository;
 
-        public UserService(IContext context)
+        public UserService(IContext context,
+            IRepository<User> userRepository,
+            IRepository<UserSubscriber> userSubscriberRepository,
+            IRepository<MeetingSubscriber> subscriberMeetingRepository,
+            IRepository<UserPhoneToConfirm> userPhoneToConfirmRepository)
         {
             _context = context;
-            _userRepository = new EntityRepository<User>(context);
-            _userSubscriberRepository = new EntityRepository<UserSubscriber>(context);
-            _subscriberMeetingRepository = new EntityRepository<MeetingSubscriber>(context);
-            _userPhoneToConfirmRepository = new EntityRepository<UserPhoneToConfirm>(context);
+            _userRepository = userRepository;
+            _userSubscriberRepository = userSubscriberRepository;
+            _subscriberMeetingRepository = subscriberMeetingRepository;
+            _userPhoneToConfirmRepository = userPhoneToConfirmRepository;
         }
 
         public async Task<List<UserSubscriber>> GetSubscribedUsers(int userId, int count, int offset) // return users? // design
@@ -59,13 +63,13 @@ namespace WhoWithMe.Services.Implementation
 
         public async Task<List<UserDTO>> GetUsers(FromToLong fromTo)
         {
-            List<User> users = await new EntityRepository<User>(_context).GetAllAsync(x => x.Id > fromTo.From && x.Id < fromTo.To);
+            List<User> users = await _userRepository.GetAllAsync(x => x.Id > fromTo.From && x.Id < fromTo.To);
             return users.Select(x => new UserDTO(x)).ToList();
         }
 
         public async Task<bool> DeleteUser(long id)
         {
-            User user = await new EntityRepository<User>(_context).GetSingleAsync(x => x.Id == id);
+            User user = await _userRepository.GetSingleAsync(x => x.Id == id);
             if (user == null)
             {
                 throw new BadRequestException("User not found");

@@ -9,12 +9,11 @@ using WhoWithMe.Services.Helpers;
 using Microsoft.AspNetCore.Http;
 using WhoWithMe.Core.Data;
 using WhoWithMe.DTO.UserDTOs;
-using WhoWithMe.Data.Repositories;
-using WhoWithMe.Data;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WhoWithMe.DTO.Model.Meeting;
+using WhoWithMe.Data; // <-- added for IContext
 
 namespace WhoWithMe.Services.Implementation
 {
@@ -29,15 +28,23 @@ namespace WhoWithMe.Services.Implementation
         private readonly IRepository<CommentMeeting> _commentMeetingRepository;
         private readonly IMeetingImageService _meetingImageService;
 
-        public MeetingService(IContext context, IMeetingImageService meetingImageService)
+        public MeetingService(
+            IContext context,
+            IRepository<MeetingType> meetingTypeRepository,
+            IRepository<City> cityRepository,
+            IRepository<Meeting> meetingRepository,
+            IRepository<MeetingImage> meetingImageRepository,
+            IRepository<MeetingSubscriber> meetingSubscriberRepository,
+            IRepository<CommentMeeting> commentMeetingRepository,
+            IMeetingImageService meetingImageService)
         {
             _context = context;
-            _meetingTypeRepository = new EntityRepository<MeetingType>(context);
-            _meetingRepository = new EntityRepository<Meeting>(context);
-            _meetingImageRepository = new EntityRepository<MeetingImage>(context);
-            _meetingSubscriberRepository = new EntityRepository<MeetingSubscriber>(context);
-            _commentMeetingRepository = new EntityRepository<CommentMeeting>(context);
-            _cityRepository = new EntityRepository<City>(context);
+            _meetingTypeRepository = meetingTypeRepository;
+            _meetingRepository = meetingRepository;
+            _meetingImageRepository = meetingImageRepository;
+            _meetingSubscriberRepository = meetingSubscriberRepository;
+            _commentMeetingRepository = commentMeetingRepository;
+            _cityRepository = cityRepository;
             _meetingImageService = meetingImageService;
         }
 

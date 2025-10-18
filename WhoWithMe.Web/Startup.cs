@@ -51,6 +51,8 @@ namespace WhoWithMe.Web
 			string connectionString = GetConnectionString();
 			services.AddDbContext<EFDbContext>(options => options.UseSqlServer(connectionString));
 			services.AddTransient<IContext, EFDbContext>();
+			// Register generic repository
+			services.AddScoped(typeof(global::Core.Data.Repositories.IRepository<>), typeof(global::WhoWithMe.Data.Repositories.EntityRepository<>));
 			services.AddScoped<IMeetingImageService, MeetingImageService>();
 			services.AddScoped<IAuthenticationService, AuthenticationService>();
 			services.AddScoped<IUserService, UserService>();
