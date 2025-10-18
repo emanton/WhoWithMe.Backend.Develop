@@ -19,6 +19,7 @@ using WhoWithMe.Data;
 using WhoWithMe.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
+using WhoWithMe.Web.Middleware;
 
 namespace WhoWithMe.Web
 {
@@ -34,8 +35,9 @@ namespace WhoWithMe.Web
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			string securityKey = "EmAntonAleksandrovich1995secretKey";
-			string issuer = "issuer";
+			// Read JWT config from configuration (env vars, appsettings, user secrets)
+			string securityKey = Configuration["Jwt:Key"] ?? "EmAntonAleksandrovich1995secretKey";
+			string issuer = Configuration["Jwt:Issuer"] ?? "issuer";
 
 			services.AddControllers();
 			services.AddSwaggerGen();
@@ -50,7 +52,8 @@ namespace WhoWithMe.Web
 
 			string connectionString = GetConnectionString();
 			services.AddDbContext<EFDbContext>(options => options.UseSqlServer(connectionString));
-			services.AddTransient<IContext, EFDbContext>();
+			// Register IContext to resolve to the same EFDbContext instance (scoped)
+			services.AddScoped<IContext>(sp => sp.GetRequiredService<EFDbContext>());
 			// Register generic repository
 			services.AddScoped(typeof(global::Core.Data.Repositories.IRepository<>), typeof(global::WhoWithMe.Data.Repositories.EntityRepository<>));
 			services.AddScoped<IMeetingImageService, MeetingImageService>();
@@ -104,6 +107,9 @@ namespace WhoWithMe.Web
 			{
 				app.UseDeveloperExceptionPage();
 			}
+
+			// Register global exception handling middleware early in pipeline
+			app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 			// Run migrations and seed DB in development only
 			if (env.IsDevelopment())

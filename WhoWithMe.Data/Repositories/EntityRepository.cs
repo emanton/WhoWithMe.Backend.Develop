@@ -25,11 +25,6 @@ namespace WhoWithMe.Data.Repositories
             _dbEntitySet = _context.Set<TEntity>();
         }
 
-        public IQueryable<TEntity> GetAllQueryable()
-        {
-            return _dbEntitySet;
-        }
-
         public List<TEntity> GetAll()
         {
             return _dbEntitySet.ToList();

@@ -1,7 +1,6 @@
 ﻿using Core.Data.Repositories.Enum;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +11,6 @@ namespace Core.Data.Repositories
     public interface IRepository<TEntity> : IDisposable where TEntity : IBaseEntity
     {
         Task<int> GetCount(Expression<Func<TEntity, bool>> predicate);
-        IQueryable<TEntity> GetAllQueryable();
         List<TEntity> GetAll();
         List<TEntity> GetAllIncluding(params Expression<Func<TEntity, object>>[] includeProperties);
         Task<TEntity> GetSingleAsync(Expression<Func<TEntity, bool>> predicate);
