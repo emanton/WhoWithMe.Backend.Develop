@@ -1,5 +1,5 @@
 import React from 'react'
-import Meetings from './components/Meetings'
+import Meetings from './pages/Meetings'
 
 export default function App() {
   return (
