@@ -1,0 +1,4 @@
+.register-note{font-size:13px;color:var(--muted);margin-top:8px}
+.register-helpers{display:flex;gap:8px;margin-top:12px}
+.register-helpers a{color:var(--primary);text-decoration:none}
+.register-helpers a:hover{text-decoration:underline}

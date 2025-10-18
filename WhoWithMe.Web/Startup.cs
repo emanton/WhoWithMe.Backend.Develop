@@ -41,7 +41,7 @@ namespace WhoWithMe.Web
 			services.AddSwaggerGen();
 			services.AddCors(options =>
 				options.AddPolicy("CorsPolicy", builder => builder
-					.AllowAnyOrigin()
+					.WithOrigins("http://localhost:5173")
 					.AllowAnyMethod()
 					.AllowAnyHeader()
 					.AllowCredentials()
@@ -128,6 +128,9 @@ namespace WhoWithMe.Web
 			app.UseHttpsRedirection();
 
 			app.UseRouting();
+
+			// Enable CORS policy
+			app.UseCors("CorsPolicy");
 
 			app.UseAuthentication();
 			app.UseAuthorization();
