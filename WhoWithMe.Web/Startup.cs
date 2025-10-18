@@ -20,6 +20,9 @@ using WhoWithMe.Core.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.SqlClient;
 using WhoWithMe.Web.Middleware;
+using AutoMapper;
+using FluentValidation.AspNetCore;
+using FluentValidation;
 
 namespace WhoWithMe.Web
 {
@@ -40,6 +43,7 @@ namespace WhoWithMe.Web
 			string issuer = Configuration["Jwt:Issuer"] ?? "issuer";
 
 			services.AddControllers();
+
 			services.AddSwaggerGen();
 			services.AddCors(options =>
 				options.AddPolicy("CorsPolicy", builder => builder
@@ -62,6 +66,16 @@ namespace WhoWithMe.Web
 			services.AddScoped<IMeetingService, MeetingService>();
 			services.AddScoped<IMeetingSubscriberService, MeetingSubscriberService>();
 			services.AddScoped<IDictionaryService, DictionaryService>();
+
+			// AutoMapper
+			services.AddAutoMapper(typeof(WhoWithMe.Services.Mapping.AutoMapperProfiles));
+
+			// add fluent validation auto validation and register validators from assembly
+			services.AddFluentValidationAutoValidation();
+			services.AddValidatorsFromAssembly(typeof(WhoWithMe.Services.Mapping.AutoMapperProfiles).Assembly);
+
+			// health checks
+			services.AddHealthChecks();
 
 			// auth
 			services
@@ -146,6 +160,7 @@ namespace WhoWithMe.Web
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllers();
+				endpoints.MapHealthChecks("/health");
 			});
 		}
 
@@ -153,11 +168,11 @@ namespace WhoWithMe.Web
         private string GetConnectionString()
         {
             //// Prefer a full connection string in configuration first
-            //var configured = Configuration.GetConnectionString("DefaultConnection");
-            //if (!string.IsNullOrWhiteSpace(configured))
-            //{
-            //    return configured;
-            //}
+            var configured = Configuration.GetConnectionString("DefaultConnection");
+            if (!string.IsNullOrWhiteSpace(configured))
+            {
+                return configured;
+            }
 
             //// Fallback to individual settings (use user secrets or environment variables in development)
             var dataSource = Configuration["Db:DataSource"];

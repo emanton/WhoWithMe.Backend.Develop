@@ -8,9 +8,12 @@ namespace WhoWithMe.DTO.UserDTOs
 {
 	public class UserDTO
 	{
+        public UserDTO() { }
+
         public UserDTO(User user)
         {
-            user.Id = Id;
+            if (user == null) return;
+            Id = user.Id;
             AvatarImageUrl = user.AvatarImageUrl;
             Nickname = user.Nickname;
             Firstname = user.Firstname;

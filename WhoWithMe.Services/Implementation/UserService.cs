@@ -15,6 +15,7 @@ using WhoWithMe.Services.Exceptions;
 using WhoWithMe.DTO.UserDTOs;
 using WhoWithMe.Data.Repositories;
 using WhoWithMe.Data;
+using AutoMapper;
 
 namespace WhoWithMe.Services.Implementation
 {
@@ -23,20 +24,23 @@ namespace WhoWithMe.Services.Implementation
         private readonly IContext _context;
         private readonly IRepository<User> _userRepository;
         private readonly IRepository<UserSubscriber> _userSubscriberRepository;
-        private readonly IRepository<MeetingSubscriber> _subscriberMeetingRepository;
-        private readonly IRepository<UserPhoneToConfirm> _userPhoneToConfirmRepository;
+        private readonly IRepository<MeetingSubscriber> _subscriberMeeting_repository;
+        private readonly IRepository<UserPhoneToConfirm> _userPhoneToConfirm_repository;
+        private readonly IMapper _mapper;
 
         public UserService(IContext context,
             IRepository<User> userRepository,
             IRepository<UserSubscriber> userSubscriberRepository,
             IRepository<MeetingSubscriber> subscriberMeetingRepository,
-            IRepository<UserPhoneToConfirm> userPhoneToConfirmRepository)
+            IRepository<UserPhoneToConfirm> userPhoneToConfirmRepository,
+            IMapper mapper)
         {
             _context = context;
             _userRepository = userRepository;
             _userSubscriberRepository = userSubscriberRepository;
-            _subscriberMeetingRepository = subscriberMeetingRepository;
-            _userPhoneToConfirmRepository = userPhoneToConfirmRepository;
+            _subscriberMeeting_repository = subscriberMeetingRepository;
+            _userPhoneToConfirm_repository = userPhoneToConfirmRepository;
+            _mapper = mapper;
         }
 
         public async Task<List<UserSubscriber>> GetSubscribedUsers(int userId, int count, int offset) // return users? // design
@@ -46,25 +50,26 @@ namespace WhoWithMe.Services.Implementation
 
         public async Task<List<MeetingSubscriber>> GetUserVisits(int userId, int count, int offset) // return meetings? // designs
         {
-            return await _subscriberMeetingRepository.GetAllAsync(count, offset, x => x.UserId == userId);
+            return await _subscriberMeeting_repository.GetAllAsync(count, offset, x => x.UserId == userId);
         }
 
         public async Task<UserDTO> GetUserInfo(long userId)
         {
             User user = await _userRepository.GetSingleAsync(userId);
-            return new UserDTO(user);
+            return _mapper.Map<UserDTO>(user);
         }
 
         public async Task<int> EditUserInfo(UserDTO user)
         {
-            _userRepository.Update(user.GetUser());
+            var entity = _mapper.Map<User>(user);
+            _userRepository.Update(entity);
             return await _context.SaveChangesAsync();
         }
 
         public async Task<List<UserDTO>> GetUsers(FromToLong fromTo)
         {
             List<User> users = await _userRepository.GetAllAsync(x => x.Id > fromTo.From && x.Id < fromTo.To);
-            return users.Select(x => new UserDTO(x)).ToList();
+            return users.Select(x => _mapper.Map<UserDTO>(x)).ToList();
         }
 
         public async Task<bool> DeleteUser(long id)
@@ -92,7 +97,7 @@ namespace WhoWithMe.Services.Implementation
                 DateTimeCreated = DateTime.Now,
             };
 
-            _userPhoneToConfirmRepository.Insert(userPhoneToConfirm);
+            _userPhoneToConfirm_repository.Insert(userPhoneToConfirm);
             await _context.SaveChangesAsync();
             // send confirmPassword to phone TODO REDO
             return true;
@@ -101,7 +106,7 @@ namespace WhoWithMe.Services.Implementation
         public async Task<bool> ConfirmPhoneNumberPassword(PhoneConfirmPassword phoneConfirmPassword)
         {
             Random r = new Random();
-            List<UserPhoneToConfirm> phoneToConfirm = await _userPhoneToConfirmRepository.FindByAsync(x =>
+            List<UserPhoneToConfirm> phoneToConfirm = await _userPhoneToConfirm_repository.FindByAsync(x =>
             x.DateTimeCreated > DateTime.Now.AddDays(-1)
             && x.UserId == phoneConfirmPassword.UserId
             && x.PhoneNumber == phoneConfirmPassword.PhoneNumber
