@@ -18,12 +18,7 @@ namespace WhoWithMe.DTO.Meeting
 		public long Id { get; set; }
 		public List<long> RemovedImageIds { get; set; }
 
-		public override Core.Entities.Meeting GetMeeting()
-		{
-			Core.Entities.Meeting meeting = base.GetMeeting();
-			meeting.Id = Id;
-			return meeting;
-		}
+		// Mapping to entity is handled by AutoMapper in services
 	}
 
 	public class MeetingEditDTOTemp : MeetingCreateDTOTemp

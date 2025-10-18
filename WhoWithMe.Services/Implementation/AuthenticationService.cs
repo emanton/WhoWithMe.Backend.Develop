@@ -1,4 +1,4 @@
-﻿using WhoWithMe.Services.Interfaces;
+using WhoWithMe.Services.Interfaces;
 using WhoWithMe.DTO.Model.Authorization;
 using System;
 using System.Collections.Generic;
@@ -18,6 +18,8 @@ using WhoWithMe.Services.Exceptions;
 using WhoWithMe.DTO.Authorization;
 using WhoWithMe.Data.Repositories;
 using WhoWithMe.Data;
+using Microsoft.Extensions.Configuration;
+using System.Security.Cryptography;
 
 namespace WhoWithMe.Services.Implementation
 {
@@ -26,11 +28,13 @@ namespace WhoWithMe.Services.Implementation
 	{
 		private readonly IContext _context;
 		private readonly IRepository<User> _userRepository;
+		private readonly IConfiguration _configuration;
 
-		public AuthenticationService(IContext context, IRepository<User> userRepository)
+		public AuthenticationService(IContext context, IRepository<User> userRepository, IConfiguration configuration)
 		{
 			_context = context;
 			_userRepository = userRepository;
+			_configuration = configuration;
 		}
 
 		public async Task<UserWithToken> EmailRegister(LoginData loginData)
@@ -108,8 +112,8 @@ namespace WhoWithMe.Services.Implementation
 
 		private string GenerateJWT(User user)
 		{
-			string issuer = "issuer";
-			string secretKey = "EmAntonAleksandrovich1995secretKey";
+			string issuer = _configuration["Jwt:Issuer"] ?? "issuer";
+			string secretKey = _configuration["Jwt:Key"] ?? "EmAntonAleksandrovich1995secretKey";
 			byte[] key = Encoding.UTF8.GetBytes(secretKey);
 			SymmetricSecurityKey securityKey = new SymmetricSecurityKey(key);
 			SigningCredentials cred = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -134,8 +138,11 @@ namespace WhoWithMe.Services.Implementation
 		private string EncodePassword(string password)
 		{
 			byte[] data = Encoding.ASCII.GetBytes(password);
-			data = new System.Security.Cryptography.SHA256Managed().ComputeHash(data);
-			string hash = Encoding.ASCII.GetString(data);
+			using (var sha = SHA256.Create())
+			{
+				data = sha.ComputeHash(data);
+			}
+			string hash = Convert.ToHexString(data);
 			return hash;
 		}
 

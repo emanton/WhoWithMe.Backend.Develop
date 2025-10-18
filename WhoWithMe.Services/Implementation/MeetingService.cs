@@ -14,6 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using WhoWithMe.DTO.Model.Meeting;
 using WhoWithMe.Data; // <-- added for IContext
+using AutoMapper;
 
 namespace WhoWithMe.Services.Implementation
 {
@@ -27,6 +28,7 @@ namespace WhoWithMe.Services.Implementation
         private readonly IRepository<MeetingSubscriber> _meetingSubscriberRepository;
         private readonly IRepository<CommentMeeting> _commentMeetingRepository;
         private readonly IMeetingImageService _meetingImageService;
+        private readonly IMapper _mapper;
 
         public MeetingService(
             IContext context,
@@ -36,7 +38,8 @@ namespace WhoWithMe.Services.Implementation
             IRepository<MeetingImage> meetingImageRepository,
             IRepository<MeetingSubscriber> meetingSubscriberRepository,
             IRepository<CommentMeeting> commentMeetingRepository,
-            IMeetingImageService meetingImageService)
+            IMeetingImageService meetingImageService,
+            IMapper mapper)
         {
             _context = context;
             _meetingTypeRepository = meetingTypeRepository;
@@ -46,6 +49,7 @@ namespace WhoWithMe.Services.Implementation
             _commentMeetingRepository = commentMeetingRepository;
             _cityRepository = cityRepository;
             _meetingImageService = meetingImageService;
+            _mapper = mapper;
         }
 
         public async Task<List<Meeting>> GetMeetingsByTypeAndTitleAndSortType(MeetingSearchDTO meetingSearchDTO)
@@ -83,7 +87,8 @@ namespace WhoWithMe.Services.Implementation
 
         public async Task<int> AddMeeting(MeetingCreateDTO meetingDTO, long currentUserId)
         {
-            Meeting meeting = meetingDTO.GetMeeting();
+            // map DTO to entity using AutoMapper
+            Meeting meeting = _mapper.Map<Meeting>(meetingDTO);
             _meetingRepository.Insert(meeting);
             int res = await _context.SaveChangesAsync();
             await _meetingImageService.CreateMeetingImages(meeting.Id, meetingDTO.MeetingImages);
@@ -92,7 +97,9 @@ namespace WhoWithMe.Services.Implementation
 
         public async Task<int> EditMeeting(MeetingEditDTO meetingDTO, long currentUserId)
         {
-            Meeting meeting = meetingDTO.GetMeeting();
+            // map DTO to entity and ensure Id is preserved
+            Meeting meeting = _mapper.Map<Meeting>(meetingDTO);
+            meeting.Id = meetingDTO.Id;
             _meetingRepository.Update(meeting);
             int res = await _context.SaveChangesAsync();
             await _meetingImageService.DeleteMeetingImages(meetingDTO.RemovedImageIds);

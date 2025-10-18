@@ -19,8 +19,9 @@ namespace WhoWithMe.Services.Mapping
             CreateMap<User, UserWithToken>().ConstructUsing(u => new UserWithToken(u));
 
             // Map Meeting DTOs to Meeting entity
-            CreateMap<MeetingBaseDTO, Meeting>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore());
+            CreateMap<MeetingBaseDTO, Meeting>();
+            CreateMap<MeetingCreateDTO, Meeting>().IncludeBase<MeetingBaseDTO, Meeting>();
+            CreateMap<MeetingEditDTO, Meeting>().IncludeBase<MeetingBaseDTO, Meeting>();
 
             // Map Meeting entity to MeetingView DTO
             CreateMap<Meeting, MeetingView>().ConstructUsing(m => new MeetingView(m));
