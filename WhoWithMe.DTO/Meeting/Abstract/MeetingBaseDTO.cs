@@ -39,40 +39,4 @@ namespace WhoWithMe.DTO.Meeting.Abstract
         public double Latitude { get; set; }
         public double Longitude { get; set; }
     }
-
-
-    public class MeetingBaseDTOTemp
-    {
-        public string title { get; set; }
-        public string address { get; set; }
-        public DateTime createdDate { get; set; }
-        public DateTime startDate { get; set; }
-        public string avatarImageUrl { get; set; }
-        public string description { get; set; }
-        public string requirements { get; set; }
-        public long creatorId { get; set; }
-        public long cityId { get; set; }
-        public long meetingTypeId { get; set; }
-        public double latitude { get; set; }
-        public double longitude { get; set; }
-
-        public virtual MeetingBaseDTO GetMeetingBaseDTO()
-        {
-            return new MeetingBaseDTO
-            {
-                Title = title,
-                Address = address,
-                CreatedDate = createdDate,
-                StartDate = startDate,
-                AvatarImageUrl = avatarImageUrl,
-                Description = description,
-                Requirements = requirements,
-                CreatorId = creatorId,
-                CityId = cityId,
-                MeetingTypeId = meetingTypeId,
-                Latitude = latitude,
-                Longitude = longitude
-            };
-        }
-    }
 }

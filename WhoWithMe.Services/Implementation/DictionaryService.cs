@@ -12,6 +12,7 @@ using WhoWithMe.Services.Exceptions;
 using WhoWithMe.Services.Interfaces;
 using WhoWithMe.Data.Repositories;
 using WhoWithMe.Data;
+using AutoMapper;
 
 
 namespace WhoWithMe.Services.Implementation
@@ -21,13 +22,15 @@ namespace WhoWithMe.Services.Implementation
         private readonly IContext _context;
         private readonly IRepository<MeetingType> _meetingTypeRepository;
         private readonly IRepository<City> _cityRepository;
+        private readonly IMapper _mapper;
 
 
-        public DictionaryService(IContext context)
+        public DictionaryService(IContext context, IRepository<MeetingType> meetingTypeRepository, IRepository<City> cityRepository, IMapper mapper)
         {
             _context = context;
-            _meetingTypeRepository = new EntityRepository<MeetingType>(context);
-            _cityRepository = new EntityRepository<City>(context);
+            _meetingTypeRepository = meetingTypeRepository;
+            _cityRepository = cityRepository; // typo fix
+            _mapper = mapper;
         }
 
         public async Task<List<MeetingType>> GetMeetingTypes()
@@ -38,7 +41,8 @@ namespace WhoWithMe.Services.Implementation
 
         public async Task<int> AddMeetingType(MeetingTypeDTO meetingType)
         {
-            _meetingTypeRepository.Insert(meetingType.GetMeetingType());
+            var entity = _mapper.Map<MeetingType>(meetingType);
+            _meetingTypeRepository.Insert(entity);
             return await _context.SaveChangesAsync();
         }
 
@@ -49,7 +53,8 @@ namespace WhoWithMe.Services.Implementation
 
         public async Task<int> AddCity(CityDTO meetingType)
         {
-            _cityRepository.Insert(meetingType.GetCity());
+            var entity = _mapper.Map<City>(meetingType);
+            _cityRepository.Insert(entity);
             return await _context.SaveChangesAsync();
         }
     }

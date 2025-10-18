@@ -5,8 +5,6 @@ using WhoWithMe.DTO.Meeting;
 using WhoWithMe.DTO.Meeting.Abstract;
 using WhoWithMe.DTO.Authorization;
 using WhoWithMe.Core.Entities.dictionaries;
-using WhoWithMe.DTO.Meeting; 
-using WhoWithMe.DTO.Meeting;
 
 namespace WhoWithMe.Services.Mapping
 {
@@ -22,7 +20,8 @@ namespace WhoWithMe.Services.Mapping
             CreateMap<User, UserWithToken>().ConstructUsing(u => new UserWithToken(u));
 
             // Map Meeting DTOs to Meeting entity
-            CreateMap<MeetingBaseDTO, Meeting>();
+            CreateMap<MeetingBaseDTO, Meeting>()
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
             CreateMap<MeetingCreateDTO, Meeting>().IncludeBase<MeetingBaseDTO, Meeting>();
             CreateMap<MeetingEditDTO, Meeting>().IncludeBase<MeetingBaseDTO, Meeting>();
 
@@ -35,6 +34,9 @@ namespace WhoWithMe.Services.Mapping
 
             CreateMap<CityDTO, City>();
             CreateMap<City, CityDTO>();
+
+            // Map MeetingSubscriber DTO
+            CreateMap<MeetingSubscriberDTO, MeetingSubscriber>();
 
             // Additional mappings as needed
         }

@@ -12,6 +12,7 @@ using WhoWithMe.Services.Exceptions;
 using WhoWithMe.Services.Interfaces;
 using WhoWithMe.Data.Repositories;
 using WhoWithMe.Data;
+using AutoMapper;
 
 namespace WhoWithMe.Services.Implementation
 {
@@ -19,12 +20,14 @@ namespace WhoWithMe.Services.Implementation
     {
         private readonly IContext _context;
         private readonly IRepository<MeetingSubscriber> _meetingSubscriberRepository;
+        private readonly IMapper _mapper;
 
 
-        public MeetingSubscriberService(IContext context)
+        public MeetingSubscriberService(IContext context, IRepository<MeetingSubscriber> meetingSubscriberRepository, IMapper mapper)
         {
             _context = context;
-            _meetingSubscriberRepository = new EntityRepository<MeetingSubscriber>(context);
+            _meetingSubscriberRepository = meetingSubscriberRepository;
+            _mapper = mapper;
         }
 
         public async Task<List<MeetingSubscriber>> GetMeetingAcceptedSubscribers(PaginationMeetingId paginationMeetingId)
@@ -43,7 +46,8 @@ namespace WhoWithMe.Services.Implementation
             {
                 throw new BadRequestException("He is already subscriber");
             }
-            _meetingSubscriberRepository.Insert(meetingSubscriber.GetMeetingSubscriber());
+            var entity = _mapper.Map<MeetingSubscriber>(meetingSubscriber);
+            _meetingSubscriberRepository.Insert(entity);
             return await _context.SaveChangesAsync();
         }
 

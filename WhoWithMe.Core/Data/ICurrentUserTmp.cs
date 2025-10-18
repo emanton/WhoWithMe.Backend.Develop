@@ -8,17 +8,6 @@ namespace WhoWithMe.Core.Data
 {
 	public interface ICurrentUserTmp
 	{
-
-		// TODO REMOVE DELETE
 		string CurrentUserId { get; set; }
 	}
-
-	//public abstract class CurrentUserTmp : ICurrentUserTmp
-	//{
-
-	//	// TODO REMOVE DELETE
-	//	[NotMapped]
-	//	[JsonIgnore]
-	//	public string CurrentUserId { get; set; }
-	//}
 }

@@ -8,12 +8,6 @@ namespace WhoWithMe.DTO.Meeting
 	{
 		public string Name { get; set; }
 
-		public MeetingType GetMeetingType()
-		{
-			return new MeetingType
-			{
-				Name = Name
-			};
-		}
+		// Mapping to entity is handled by AutoMapper
 	}
 }

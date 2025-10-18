@@ -35,21 +35,5 @@ namespace WhoWithMe.DTO.UserDTOs
         public string FacebookId { get; set; }
         public string GmailId { get; set; }
         //public virtual List<MeetingSubscriber> MeetingSubscribers { get; set; }
-
-        public User GetUser()
-		{
-            User user = new User();
-            user.Id = Id;
-            user.AvatarImageUrl = AvatarImageUrl;
-            user.Nickname = Nickname;
-            user.Firstname = Firstname;
-            user.Lastname = Lastname;
-            user.Email = Email;
-            user.Phone = Phone;
-            user.FacebookId = FacebookId;
-            user.GmailId = GmailId;
-            user.City = City;
-            return user;
-        }
     }
 }

@@ -47,12 +47,9 @@ namespace WhoWithMe.Web.Controllers
 		public async Task<IActionResult> DeleteMeeting(CurrentUserIdMeetingId meetingId) => await Wrap(_meetingService.DeleteMeeting, meetingId);
 
 		[HttpPost("AddMeeting")]
-		public async Task<IActionResult> AddMeeting([FromForm] MeetingCreateDTOTemp meeting) => await AddMeetingHelper(meeting.GetMeetingCreateDTO());
+		public async Task<IActionResult> AddMeeting([FromForm] MeetingCreateDTO meeting) => await WrapWithCurrentUser(_meetingService.AddMeeting, meeting);
 
 		[HttpPost("EditMeeting")]
-		public async Task<IActionResult> EditMeeting([FromForm] MeetingEditDTOTemp meeting) => await EditMeetingHelper(meeting.GetMeetingEditDTO());
-		private async Task<IActionResult> AddMeetingHelper(MeetingCreateDTO meeting) => await WrapWithCurrentUser(_meetingService.AddMeeting, meeting);
-
-		private async Task<IActionResult> EditMeetingHelper(MeetingEditDTO meeting) => await WrapWithCurrentUser(_meetingService.EditMeeting, meeting);
+		public async Task<IActionResult> EditMeeting([FromForm] MeetingEditDTO meeting) => await WrapWithCurrentUser(_meetingService.EditMeeting, meeting);
 	}
 }

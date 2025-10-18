@@ -6,15 +6,9 @@ using WhoWithMe.Core.Entities.dictionaries;
 
 namespace WhoWithMe.DTO.Meeting
 {
-	public class CityDTO// : CurrentUserTmp
+	public class CityDTO
 	{
 		public string Name { get; set; }
-		public City GetCity()
-		{
-			return new City
-			{
-				Name = Name
-			};
-		}
+		// Mapping to entity is handled by AutoMapper
 	}
 }

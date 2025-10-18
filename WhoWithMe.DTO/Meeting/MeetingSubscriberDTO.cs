@@ -7,19 +7,10 @@ using WhoWithMe.Core.Entities;
 
 namespace WhoWithMe.DTO.Meeting
 {
-	public class MeetingSubscriberDTO// : CurrentUserTmp
+	public class MeetingSubscriberDTO
 	{
 		public long UserId { get; set; }
 		public long MeetingId { get; set; }
 		public bool IsAccepted { get; set; }
-
-		public MeetingSubscriber GetMeetingSubscriber()
-		{
-			return new MeetingSubscriber
-			{
-				UserId = UserId,
-				MeetingId = MeetingId,
-			};
-		}
 	}
 }

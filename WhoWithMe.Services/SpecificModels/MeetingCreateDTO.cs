@@ -18,17 +18,17 @@ namespace WhoWithMe.DTO.Meeting
 		}
 		public IEnumerable<FormFile> MeetingImages { get; set; }
 	}
-
-	public class MeetingCreateDTOTemp : MeetingBaseDTOTemp
-	{
-		public IEnumerable<FormFile> meetingImages { get; set; }
-		public MeetingCreateDTO GetMeetingCreateDTO()
-		{
-			MeetingBaseDTO dto = GetMeetingBaseDTO();
-			MeetingCreateDTO meetingCreateDTO = new MeetingCreateDTO(dto);
-			meetingCreateDTO.MeetingImages = meetingImages;
-			return meetingCreateDTO;
-		}
-	}
 	
+	public class MeetingEditDTO : MeetingCreateDTO, IBaseEntity
+	{
+		public MeetingEditDTO()
+		{
+
+		}
+		public MeetingEditDTO(MeetingBaseDTO baseDto) : base(baseDto)
+		{
+		}
+		public long Id { get; set; }
+		public List<long> RemovedImageIds { get; set; }
+	}
 }
