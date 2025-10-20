@@ -114,8 +114,18 @@ namespace WhoWithMe.Services.Implementation
 		{
 			string issuer = _configuration["Jwt:Issuer"] ?? "issuer";
 			string secretKey = _configuration["Jwt:Key"] ?? "EmAntonAleksandrovich1995secretKey";
-			byte[] key = Encoding.UTF8.GetBytes(secretKey);
-			SymmetricSecurityKey securityKey = new SymmetricSecurityKey(key);
+
+			// Ensure signing key length is at least 32 bytes (256 bits) required by HS256.
+			byte[] keyBytes = Encoding.UTF8.GetBytes(secretKey ?? string.Empty);
+			if (keyBytes.Length < 32)
+			{
+				using (var sha = SHA256.Create())
+				{
+					keyBytes = sha.ComputeHash(keyBytes);
+				}
+			}
+
+			SymmetricSecurityKey securityKey = new SymmetricSecurityKey(keyBytes);
 			SigningCredentials cred = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 			JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
 			SecurityTokenDescriptor tokenDescriptor = new SecurityTokenDescriptor
@@ -124,9 +134,9 @@ namespace WhoWithMe.Services.Implementation
 					new Claim[]
 					{
 						new Claim("UserId", user.Id.ToString()),
-						new Claim(JwtRegisteredClaimNames.Jti, new Guid().ToString())
+						new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
 					}),
-				Expires = DateTime.Now.AddDays(1),
+				Expires = DateTime.UtcNow.AddDays(1),
 				SigningCredentials = cred,
 				Issuer = issuer,
 				Audience = issuer

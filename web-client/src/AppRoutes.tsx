@@ -5,6 +5,7 @@ import Register from './pages/Register'
 import Login from './pages/Login'
 import Admin from './pages/Admin'
 import CreateMeeting from './pages/CreateMeeting'
+import MeetingDetails from './pages/MeetingDetails'
 
 export default function AppRoutes() {
   return (
@@ -29,6 +30,7 @@ export default function AppRoutes() {
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/create" element={<CreateMeeting />} />
+          <Route path="/meeting/:id" element={<MeetingDetails />} />
         </Routes>
 
         <div className="footer">Demo project</div>
