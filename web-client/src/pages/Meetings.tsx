@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import api from '../api'
+import { Link } from 'react-router-dom'
 
 interface Meeting {
   id: number
@@ -43,7 +44,6 @@ export default function Meetings() {
         count: 20,
         offset: offset
       }
-      // include title if provided (backend may ignore unknown fields if DTO doesn't contain title)
       if (title && title.trim().length > 0) payload.title = title.trim()
 
       const res = await api.post('/Meeting/GetMeetingsByTitleAndType', payload)
@@ -97,7 +97,7 @@ export default function Meetings() {
         <ul className="list">
           {meetings.map((m: any) => (
             <li key={m.id ?? m.Id}>
-              <div className="meeting-title">{m.title ?? m.Title}</div>
+              <div className="meeting-title"><Link to={`/meeting/${m.id ?? m.Id}`}>{m.title ?? m.Title}</Link></div>
               <div className="meeting-desc">{m.description ?? m.Description}</div>
             </li>
           ))}
