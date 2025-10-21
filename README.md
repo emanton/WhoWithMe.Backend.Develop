@@ -1,11 +1,14 @@
-# SkillFindingService
+# WhoWithMe
+Everyday doing some stuff when I have a free time!)
 
-This is a project for my diploma. It is for finding a job.
+Social network
+Main purpose:
+Create events, for which other people can subscribe
 
-There are 2 types of users:
-1) workers;
-2) clients,
+UI was supposed to be in react native. And not to be in this repository.
+But currently want to quickly implement it by React in folder "web-client". 
 
-A worker can register in this service. Then, fill some information about him and choose skills which he can do.
+Currently playing a lot of with Git Copilot and making a lot of restructorization/refactoring stuff. 
+That`s why commits lately are very messy! Sorry for it.
 
-A client can write in the search field some nessesary service, which he needs. Then, he will see the most suitable people, who can help him.
+Hope, I will find a time soonly to esteblish order here! See you! 
