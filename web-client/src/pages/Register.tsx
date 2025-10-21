@@ -1,37 +1,40 @@
-import React, { useState } from 'react'
-import api from '../api'
+import React, { useState, useContext } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { AuthContext } from '../AuthProvider'
 import '../styles/register.css'
 
 export default function Register() {
+  const { register } = useContext<any>(AuthContext)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [message, setMessage] = useState('')
+  const [error, setError] = useState<string | null>(null)
+  const navigate = useNavigate()
 
-  async function submit(e: React.FormEvent) {
-    e.preventDefault()
+  const doRegister = async () => {
+    setError(null)
     try {
-      const res = await api.post('/Authorization/EmailRegister', { email, password })
-      setMessage(res.data?.data?.token ? 'Registered and logged in' : 'Registered')
-    } catch (err: any) {
-      setMessage(err?.response?.data?.error ?? 'Error')
+      await register(email, password)
+      navigate('/')
+    } catch (e: any) {
+      setError(e?.message ?? 'Registration failed')
     }
   }
 
   return (
     <div className="container">
-      <div className="card">
-        <form onSubmit={submit}>
+      <div className="card auth-form">
+        <form onSubmit={e => { e.preventDefault(); doRegister() }}>
           <h2>Register</h2>
+          {error && <div style={{ color: 'red' }}>{error}</div>}
           <div className="form-row">
             <label>Email</label>
-            <input value={email} onChange={e => setEmail(e.target.value)} />
+            <input className="input" value={email} onChange={e => setEmail(e.target.value)} />
           </div>
           <div className="form-row">
             <label>Password</label>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
+            <input className="input" type="password" value={password} onChange={e => setPassword(e.target.value)} />
           </div>
           <button className="button" type="submit">Register</button>
-          <div className="message">{message}</div>
           <div className="register-note">By registering you accept terms.</div>
           <div className="register-helpers">
             <a href="/login">Already have account?</a>

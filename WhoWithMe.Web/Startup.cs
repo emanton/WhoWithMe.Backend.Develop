@@ -26,155 +26,130 @@ using FluentValidation;
 
 namespace WhoWithMe.Web
 {
-	public class Startup
-	{
-		public Startup(IConfiguration configuration)
-		{
-			Configuration = configuration;
-		}
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
 
-		public IConfiguration Configuration { get; }
-		
-		// This method gets called by the runtime. Use this method to add services to the container.
-		public void ConfigureServices(IServiceCollection services)
-		{
-			// Read JWT config from configuration (env vars, appsettings, user secrets)
-			string securityKey = Configuration["Jwt:Key"] ?? "EmAntonAleksandrovich1995secretKey";
-			string issuer = Configuration["Jwt:Issuer"] ?? "issuer";
+        public IConfiguration Configuration { get; }
 
-			services.AddControllers();
+        public void ConfigureServices(IServiceCollection services)
+        {
+            string securityKey = Configuration["Jwt:Key"] ?? "EmAntonAleksandrovich1995secretKey";
+            string issuer = Configuration["Jwt:Issuer"] ?? "issuer";
 
-			services.AddSwaggerGen();
-			services.AddCors(options =>
-				options.AddPolicy("CorsPolicy", builder => builder
-					.WithOrigins("http://localhost:5173")
-					.AllowAnyMethod()
-					.AllowAnyHeader()
-					.AllowCredentials()
-					.Build())
-			);
+            services.AddControllers();
 
-			string connectionString = GetConnectionString();
-			services.AddDbContext<EFDbContext>(options => options.UseSqlServer(connectionString));
-			// Register IContext to resolve to the same EFDbContext instance (scoped)
-			services.AddScoped<IContext>(sp => sp.GetRequiredService<EFDbContext>());
-			// Register generic repository
-			services.AddScoped(typeof(global::Core.Data.Repositories.IRepository<>), typeof(global::WhoWithMe.Data.Repositories.EntityRepository<>));
-			services.AddScoped<IMeetingImageService, MeetingImageService>();
-			services.AddScoped<IAuthenticationService, AuthenticationService>();
-			services.AddScoped<IUserService, UserService>();
-			services.AddScoped<IMeetingService, MeetingService>();
-			services.AddScoped<IMeetingSubscriberService, MeetingSubscriberService>();
-			services.AddScoped<IDictionaryService, DictionaryService>();
+            services.AddSwaggerGen();
+            services.AddCors(options =>
+                options.AddPolicy("CorsPolicy", builder => builder
+                    .WithOrigins("http://localhost:5173")
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials()
+                    .Build())
+            );
 
-			// AutoMapper
-			services.AddAutoMapper(typeof(WhoWithMe.Services.Mapping.AutoMapperProfiles));
+            string connectionString = GetConnectionString();
+            services.AddDbContext<EFDbContext>(options => options.UseSqlServer(connectionString));
+            services.AddScoped<IContext>(sp => sp.GetRequiredService<EFDbContext>());
+            services.AddScoped(typeof(global::Core.Data.Repositories.IRepository<>), typeof(global::WhoWithMe.Data.Repositories.EntityRepository<>));
+            services.AddScoped<IMeetingImageService, MeetingImageService>();
+            services.AddScoped<IAuthenticationService, AuthenticationService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IMeetingService, MeetingService>();
+            services.AddScoped<IMeetingSubscriberService, MeetingSubscriberService>();
+            services.AddScoped<IDictionaryService, DictionaryService>();
+            services.AddScoped<ICommentService, CommentService>();
 
-			// add fluent validation auto validation and register validators from assembly
-			services.AddFluentValidationAutoValidation();
-			services.AddValidatorsFromAssembly(typeof(WhoWithMe.Services.Mapping.AutoMapperProfiles).Assembly);
+            services.AddAutoMapper(typeof(WhoWithMe.Services.Mapping.AutoMapperProfiles));
 
-			// health checks
-			services.AddHealthChecks();
+            services.AddFluentValidationAutoValidation();
+            services.AddValidatorsFromAssembly(typeof(WhoWithMe.Services.Mapping.AutoMapperProfiles).Assembly);
 
-			// auth
-			services
-			.AddAuthentication(auth =>
-			{
-				auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-				auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-			})
-			.AddJwtBearer(jwt =>
-			{
-				jwt.RequireHttpsMetadata = false;
-				jwt.TokenValidationParameters.ValidateIssuerSigningKey = true;
-				jwt.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey));
-				jwt.TokenValidationParameters.ValidIssuer = issuer;
-				jwt.TokenValidationParameters.ValidAudience = issuer;
-				jwt.TokenValidationParameters.ValidateIssuer = true;
-				jwt.TokenValidationParameters.ValidateAudience = true;
-			});
-			//.AddFacebook(options =>
-			//{
-			//	options.AppId = "2735362606749096";
-			//	options.AppSecret = "ab085fd41f10e4fabc13823e6b9f1d92";
-			//});
-			// auth
+            services.AddHealthChecks();
 
-			services.AddMvc(); //added by me
-		}
+            services
+            .AddAuthentication(auth =>
+            {
+                auth.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                auth.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(jwt =>
+            {
+                jwt.RequireHttpsMetadata = false;
+                jwt.TokenValidationParameters.ValidateIssuerSigningKey = true;
+                jwt.TokenValidationParameters.IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(securityKey));
+                jwt.TokenValidationParameters.ValidIssuer = issuer;
+                jwt.TokenValidationParameters.ValidAudience = issuer;
+                jwt.TokenValidationParameters.ValidateIssuer = true;
+                jwt.TokenValidationParameters.ValidateAudience = true;
+            });
 
-		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-		{
-			// swagger
-			app.UseSwagger();
-			app.UseSwaggerUI(c =>
-			{
-				c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-			});
-			// swagger
+            services.AddMvc();
+        }
 
-			
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+            });
 
-			if (env.IsDevelopment())
-			{
-				app.UseDeveloperExceptionPage();
-			}
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
 
-			// Register global exception handling middleware early in pipeline
-			app.UseMiddleware<ExceptionHandlingMiddleware>();
+            app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-			// Run migrations and seed DB in development only
-			if (env.IsDevelopment())
-			{
-				using (var scope = app.ApplicationServices.CreateScope())
-				{
-					var services = scope.ServiceProvider;
-					var logger = services.GetService<ILogger<Startup>>();
-					try
-					{
-						var context = services.GetRequiredService<EFDbContext>();
-						context.Database.Migrate();
-						DataSeeder.SeedAsync(context).GetAwaiter().GetResult();
-						logger?.LogInformation("Database migrated and seeded successfully.");
-					}
-					catch (Exception ex)
-					{
-						// Log and continue. In production prefer running migrations from deployment pipeline.
-						logger?.LogError(ex, "An error occurred while migrating or seeding the database.");
-					}
-				}
-			}
+            if (env.IsDevelopment())
+            {
+                using (var scope = app.ApplicationServices.CreateScope())
+                {
+                    var services = scope.ServiceProvider;
+                    var logger = services.GetService<ILogger<Startup>>();
+                    try
+                    {
+                        var context = services.GetRequiredService<EFDbContext>();
+                        context.Database.Migrate();
+                        DataSeeder.SeedAsync(context).GetAwaiter().GetResult();
+                        logger?.LogInformation("Database migrated and seeded successfully.");
+                    }
+                    catch (Exception ex)
+                    {
+                        logger?.LogError(ex, "An error occurred while migrating or seeding the database.");
+                    }
+                }
+            }
 
-			app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
 
-			app.UseRouting();
+            app.UseRouting();
 
-			// Enable CORS policy
-			app.UseCors("CorsPolicy");
+            app.UseCors("CorsPolicy");
 
-			app.UseAuthentication();
-			app.UseAuthorization();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
-			app.UseEndpoints(endpoints =>
-			{
-				endpoints.MapControllers();
-				endpoints.MapHealthChecks("/health");
-			});
-		}
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+                endpoints.MapHealthChecks("/health");
+            });
+        }
 
-        // TODO refactor. (use connection string from enviroment variables)
         private string GetConnectionString()
         {
-            //// Prefer a full connection string in configuration first
             var configured = Configuration.GetConnectionString("DefaultConnection");
             if (!string.IsNullOrWhiteSpace(configured))
             {
                 return configured;
             }
 
-            //// Fallback to individual settings (use user secrets or environment variables in development)
             var dataSource = Configuration["Db:DataSource"];
             var user = Configuration["Db:User"];
             var password = Configuration["Db:Password"];
@@ -190,5 +165,5 @@ namespace WhoWithMe.Web
 
             return builder.ConnectionString;
         }
-	}
+    }
 }

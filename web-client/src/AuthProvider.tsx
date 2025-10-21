@@ -12,7 +12,7 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<any>
   register: (email: string, password: string) => Promise<any>
   logout: () => void
-  authFetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>
+  authFetch: (input: RequestInfo, init?: RequestInit) => Promise<any>
 }
 
 export const AuthContext = createContext<AuthContextValue>({
@@ -21,7 +21,7 @@ export const AuthContext = createContext<AuthContextValue>({
   login: async () => ({}),
   register: async () => ({}),
   logout: () => {},
-  authFetch: (input: RequestInfo, init?: RequestInit) => fetch(input, init)
+  authFetch: async () => ({})
 })
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -81,11 +81,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('user')
   }
 
-  const authFetch = (input: RequestInfo, init: RequestInit = {}) => {
-    const headers = init.headers ? { ...(init.headers as any) } : {}
-    if (token) headers['Authorization'] = `Bearer ${token}`
-    if (!headers['Content-Type']) headers['Content-Type'] = 'application/json'
-    return fetch(input, { ...init, headers })
+  // authFetch implemented on top of axios api to keep a single HTTP client
+  const authFetch = async (input: RequestInfo, init: RequestInit = {}) => {
+    const url = typeof input === 'string' ? input : String(input)
+    const method = (init.method || 'GET').toString().toLowerCase()
+
+    // prepare data from fetch-style body
+    let data: any = undefined
+    if (init.body) {
+      try {
+        data = typeof init.body === 'string' ? JSON.parse(init.body as string) : init.body
+      } catch {
+        data = init.body
+      }
+    }
+
+    const headers: any = init.headers ? { ...(init.headers as any) } : {}
+    // attach token if present
+    const currentToken = token ?? localStorage.getItem('token')
+    if (currentToken) headers['Authorization'] = `Bearer ${currentToken}`
+    if (!headers['Content-Type'] && !headers['content-type']) headers['Content-Type'] = 'application/json'
+
+    try {
+      const response = await api.request({ url, method, data, headers })
+      // return a fetch-like response for compatibility with existing code
+      return {
+        ok: response.status >= 200 && response.status < 300,
+        status: response.status,
+        json: async () => response.data,
+        text: async () => (typeof response.data === 'string' ? response.data : JSON.stringify(response.data)),
+        data: response.data
+      }
+    } catch (err: any) {
+      const resp = err?.response
+      return {
+        ok: false,
+        status: resp?.status ?? 0,
+        json: async () => resp?.data ?? null,
+        text: async () => (resp ? JSON.stringify(resp.data) : String(err.message))
+      }
+    }
   }
 
   return (
